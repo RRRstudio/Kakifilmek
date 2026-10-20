@@ -50,7 +50,7 @@
     "title": "Torrente 6. - Az elnöki ügy",
     "type": "iframe",
     "src": "https://vkvideo.ru/video_ext.php?oid=-229926412&id=456252248&hd=4",
-    "thumbs": "https://m.media-amazon.com/images/M/MV5BMjExYWE4YjMtZDNlNi00YTU2LTkwZTEtYmVmNjVmOWM1N2I0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+    "thumb": "https://m.media-amazon.com/images/M/MV5BMjExYWE4YjMtZDNlNi00YTU2LTkwZTEtYmVmNjVmOWM1N2I0XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
     "label": "vkvideo.ru"
   },
   {
@@ -68,6 +68,7 @@
     "title": "Harry Potter és az azkabani fogoly 3",
     "type": "videa",
     "src": "https://videa.hu/player?v=kAlFZyyOlvRVY8b1",
+    "thumb": "https://media.fathomentertainment.com/image/826249444369/image_cveq1uk7pd5vf3qqmlv716lu06/-S1200-Fwebp",
     "label": "Videa"
   },
   {
@@ -76,6 +77,7 @@
     "title": "Harry Potter és a Titkok kamrája 2",
     "type": "videa",
     "src": "https://videa.hu/player?v=F1gAxgKPl0uzoRnF",
+    "thumb": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7N3ka0OcwyHshH88Xjf-Yz33dyEqWFTek69-wUtJSsnNk-76WIhAV9QU&s=10",
     "label": "Videa"
   },
   {
@@ -84,6 +86,7 @@
     "title": "Harry Potter és a bölcsek köve 1",
     "type": "videa",
     "src": "https://videa.hu/player?v=5Koh6jidYZ9eiJZj",
+    "thumb": "https://kcroonews.com/wp-content/uploads/2022/11/tileburnedin-900x506.jpeg",
     "label": "Videa"
   },
   {
@@ -92,6 +95,7 @@
     "title": "Öt éjjel Freddy pizzázójában - FNAF",
     "type": "videa",
     "src": "https://videa.hu/player?v=w8xGtr71f2OPtQct",
+    "thumb": "https://4kwallpapers.com/images/wallpapers/five-nights-at-2560x1080-13263.jpg",
     "label": "Videa"
   },
   {
@@ -100,6 +104,7 @@
     "title": "Igen nap",
     "type": "videa",
     "src": "https://videa.hu/player?v=6PEVgDtwcCpQXTgW",
+    "thumb": "https://cdng.europosters.eu/pod_public/1300/319313.jpg",
     "label": "Videa"
   },
   {
@@ -126,6 +131,7 @@
     "title": "Obsession - Megszállotság",
     "type": "videa",
     "src": "https://videa.hu/player?v=PM0BOBik9JC8g6nM",
+    "thumb": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMWAhWfPGFhQFBg954ud7O9-cS-rGi_1zQKvKQ_d5hxNZ9YUgt0cKZngE&s=10",
     "label": "Videa"
   },
   {
@@ -134,6 +140,7 @@
     "title": "Ricsi, a gólya",
     "type": "videa",
     "src": "https://videa.hu/player?v=mBjIPcSZQmZPSB8H",
+    "thumb": "https://upload.wikimedia.org/wikipedia/hu/9/96/Ricsi-a-g%C3%B3lya.jpg?utm_source=hu.wikipedia.org&utm_campaign=index&utm_content=original",
     "label": "Videa"
   },
   {
@@ -142,6 +149,7 @@
     "title": "Angry Birds 1",
     "type": "videa",
     "src": "https://videa.hu/player?v=Zlm9Xv7P9EGn7jzm",
+    "thumb": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEeclIasdeT1tBmUY_XTt0MgT4wbtk1YrqpSAGo9ggvQ&s=10",
     "label": "Videa"
   },
   {
