@@ -1,11 +1,19 @@
 [
   {
+    "id": "mvgwgbuzshz",
+    "url": "https://videa.hu/player?v=9QHF5U2ynQ8iPbl6",
+    "title": "Snoopy és Charlie Brown - A peanuts film",
+    "type": "videa",
+    "src": "https://videa.hu/player?v=9QHF5U2ynQ8iPbl6",
+    "label": "Videa"
+  },
+  {
     "id": "mvgv6i8vll4",
     "url": "https://embed.indavideo.hu/player/video/90a62ac801",
     "title": "1917",
     "type": "indavideo",
     "src": "https://embed.indavideo.hu/player/video/90a62ac801",
-     "thumb" : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAyww3WSUIrYgl95XaLIhvinvz1YzLzu2ZZju3qtGGcA&s=10",
+    "thumb": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAyww3WSUIrYgl95XaLIhvinvz1YzLzu2ZZju3qtGGcA&s=10",
     "label": "Indavideo"
   },
   {
@@ -14,7 +22,7 @@
     "title": "star wars az utolsó jedik",
     "type": "videa",
     "src": "https://videa.hu/player?v=jBaQd0BnBvTexHom",
-    "thumb" : "https://indie-outlook.com/wp-content/uploads/2017/12/star-wars-the-last-jedi.jpg",
+    "thumb": "https://indie-outlook.com/wp-content/uploads/2017/12/star-wars-the-last-jedi.jpg",
     "label": "Videa"
   },
   {
