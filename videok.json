@@ -5,6 +5,7 @@
     "title": "1917",
     "type": "indavideo",
     "src": "https://embed.indavideo.hu/player/video/90a62ac801",
+     "thumb" : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAyww3WSUIrYgl95XaLIhvinvz1YzLzu2ZZju3qtGGcA&s=10",
     "label": "Indavideo"
   },
   {
@@ -13,7 +14,7 @@
     "title": "star wars az utolsó jedik",
     "type": "videa",
     "src": "https://videa.hu/player?v=jBaQd0BnBvTexHom",
-    "thumb" : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAyww3WSUIrYgl95XaLIhvinvz1YzLzu2ZZju3qtGGcA&s=10",
+    "thumb" : "https://indie-outlook.com/wp-content/uploads/2017/12/star-wars-the-last-jedi.jpg",
     "label": "Videa"
   },
   {
@@ -22,6 +23,7 @@
     "title": "Star Wars IV. - Csillagok háborúja",
     "type": "videa",
     "src": "https://videa.hu/player?v=WPjBnMQzDVJtkfpc",
+    "thumb": "https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/3734adaa-7376-4d44-8ed6-13b1ac2374e1/compose?aspectRatio=1.78&format=webp&width=1200",
     "label": "Videa"
   },
   {
@@ -30,6 +32,7 @@
     "title": "Torrente, a törvény két bal keze",
     "type": "iframe",
     "src": "https://vkvideo.ru/video_ext.php?oid=-229926367&id=456245992&hd=3",
+    "thumb": "https://discosega.es/15715-medium_default/torrente-el-brazo-tonto-de-la-ley-bso-cd.jpg",
     "label": "vkvideo.ru"
   },
   {
@@ -38,6 +41,7 @@
     "title": "Torrente 6. - Az elnöki ügy",
     "type": "iframe",
     "src": "https://vkvideo.ru/video_ext.php?oid=-229926412&id=456252248&hd=4",
+    "thumbs": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOoP08rRXvogI_seh_b2qFe8KqqLT6lXfu26ctnyl7hw&s=10',
     "label": "vkvideo.ru"
   },
   {
