@@ -2,7 +2,10 @@
 <html lang="hu">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2a1a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kakifilmek">
 <title>Kakifilmek – A legszipiszupibb oldal</title>
 <style>
   :root{--bg:#2a1a0f;--panel:#3b2616;--panel2:#4a3020;--text:#f6e7d3;--muted:#c2a27f;--accent:#c68642;--accent2:#e8b04a;--line:#5a3b25}
@@ -14,7 +17,7 @@
   .brand{line-height:1.1}
   .slogan{font-size:12px;color:var(--muted);font-style:italic;margin:3px 0 0 32px}
   form#addForm{flex:1;display:flex;flex-wrap:wrap;gap:8px;min-width:260px}
-  input{padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;outline:none;width:100%;font-family:inherit}
+  input{padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:16px;outline:none;width:100%;font-family:inherit}
   form#addForm input#url{flex:1 1 220px;width:auto}
   form#addForm input#name{flex:0 1 200px;width:auto}
   .srow{display:flex;gap:8px;flex-basis:100%}
@@ -67,10 +70,14 @@
   #stage:fullscreen{display:flex;flex-direction:column;background:#000;justify-content:center}
   #stage:fullscreen .player{aspect-ratio:auto;flex:1;border:0;border-radius:0}
   #stage:fullscreen .ctl{margin:0;border-radius:0}
+  #stage:-webkit-full-screen{display:flex;flex-direction:column;background:#000;justify-content:center}
+  #stage:-webkit-full-screen .player{aspect-ratio:auto;flex:1;border:0;border-radius:0}
+  #stage:-webkit-full-screen .ctl{margin:0;border-radius:0}
+  .overlay{-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom)}
   .ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px 10px}
   .ctl .cb{padding:8px 12px;font-size:14px;background:var(--panel2);color:var(--text);font-weight:600}
   .ctl input[type=range]{flex:1 1 160px;width:auto;padding:0;accent-color:var(--accent2);background:none;border:0}
-  .ctl select{width:auto;padding:7px 8px;border-radius:8px;background:var(--panel2);color:var(--text);border:1px solid var(--line);font-family:inherit}
+  .ctl select{font-size:16px;width:auto;padding:7px 8px;border-radius:8px;background:var(--panel2);color:var(--text);border:1px solid var(--line);font-family:inherit}
   #cTime{font-size:13px;color:var(--muted);min-width:92px;text-align:center}
   #cNote{display:none;font-size:13px;color:var(--muted)}
   .ctl.lite > *{display:none}
@@ -557,7 +564,9 @@ function openPlayer(id) {
   document.body.style.overflow = 'hidden';
 }
 // ---- saját lejátszó-vezérlés ----
-let ad = null, pollT = null, ytReady = null, vmReady = null, dragging = false, savedRate = 1;
+// iPhone Safari: nincs Fullscreen API sima elemekre, ott a YouTube saját gombjait is megtartjuk
+const NOFS = !(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+let ad = null, pollT = null, ytReady = null, vmReady = null, vkReady = null, dragging = false, savedRate = 1;
 try { savedRate = parseFloat(localStorage.getItem('mozi-rate')) || 1; } catch (e) {}
 $('#cRate').value = String(savedRate);
 const fmt = s => { s = Math.max(0, Math.floor(s || 0)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); };
@@ -571,6 +580,11 @@ function loadVimeo() {
   if (window.Vimeo && Vimeo.Player) return Promise.resolve();
   if (!vmReady) vmReady = loadScript('https://player.vimeo.com/api/player.js');
   return vmReady;
+}
+function loadVK() {
+  if (window.VK && VK.VideoPlayer) return Promise.resolve();
+  if (!vkReady) vkReady = loadScript('https://vk.com/js/api/videoplayer.js');
+  return vkReady;
 }
 function stopPoll() { if (pollT) { clearInterval(pollT); pollT = null; } }
 function startPoll() {
@@ -589,6 +603,7 @@ function destroyCtl() {
   stopPoll();
   if (ad && ad.destroy) { try { ad.destroy(); } catch (e) {} }
   ad = null; dragging = false;
+  $('#cRate').disabled = false; $('#cRate').title = 'Sebesség';
   if (hls) { hls.destroy(); hls = null; }
   $('#player').innerHTML = '';
   $('#cSeek').value = 0; $('#cTime').textContent = '0:00 / 0:00'; $('#cPlay').textContent = '▶';
@@ -598,7 +613,7 @@ async function buildPlayer(it) {
   const token = playing;
   const box = $('#player');
   const ctl = $('#ctl');
-  const expectFull = ['file', 'hls', 'youtube', 'vimeo'].includes(it.type);
+  const expectFull = ['file', 'hls', 'youtube', 'vimeo', 'vk'].includes(it.type);
   ctl.classList.toggle('lite', !expectFull);
   const plainFrame = () => {
     box.innerHTML = '';
@@ -610,7 +625,7 @@ async function buildPlayer(it) {
   const timeout = ms => new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
 
   if (it.type === 'file' || it.type === 'hls') {
-    const v = document.createElement('video'); v.autoplay = true; v.playsInline = true;
+    const v = document.createElement('video'); v.autoplay = true; v.playsInline = true; v.setAttribute('webkit-playsinline', '');
     if (it.type === 'hls' && window.Hls && Hls.isSupported()) { hls = new Hls(); hls.loadSource(it.src); hls.attachMedia(v); }
     else v.src = it.src;
     v.addEventListener('loadedmetadata', () => { v.playbackRate = savedRate; });
@@ -626,7 +641,7 @@ async function buildPlayer(it) {
       await Promise.race([new Promise((res, rej) => {
         const p = new YT.Player(mount, {
           videoId: vid, width: '100%', height: '100%',
-          playerVars: { autoplay: 1, controls: 0, rel: 0, modestbranding: 1, playsinline: 1 },
+          playerVars: { autoplay: 1, controls: NOFS ? 1 : 0, rel: 0, modestbranding: 1, playsinline: 1 },
           events: {
             onReady: () => {
               ad = { toggle: () => (p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo()), time: () => p.getCurrentTime(), dur: () => p.getDuration(), seek: t => p.seekTo(t, true), rate: r => p.setPlaybackRate(r), paused: () => p.getPlayerState() !== 1, destroy: () => p.destroy() };
@@ -653,11 +668,25 @@ async function buildPlayer(it) {
       if (playing !== token) { try { p.destroy(); } catch (e) {} return; }
       ad = { toggle: () => (st.paused ? p.play() : p.pause()), time: () => st.t, dur: () => st.d, seek: t => p.setCurrentTime(t), rate: r => p.setPlaybackRate(r), paused: () => st.paused, destroy: () => p.destroy() };
     } catch (e) { if (playing !== token) return; ad = null; plainFrame(); return; }
+  } else if (it.type === 'vk') {
+    try {
+      await loadVK();
+      if (playing !== token) return;
+      const f = document.createElement('iframe');
+      f.src = it.src + '&js_api=1'; f.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'; f.allowFullscreen = true;
+      box.appendChild(f);
+      const p = VK.VideoPlayer(f);
+      const st = { t: 0, d: 0, s: 'unstarted' };
+      const upd = s => { if (!s) return; if (typeof s.time === 'number') st.t = s.time; if (typeof s.duration === 'number') st.d = s.duration; if (s.state) st.s = s.state; };
+      ['inited', 'timeupdate', 'started', 'resumed', 'paused', 'ended'].forEach(ev => p.on(ev, upd));
+      ad = { toggle: () => (st.s === 'playing' ? p.pause() : p.play()), time: () => st.t, dur: () => st.d || p.getDuration(), seek: t => p.seek(t), rate: () => {}, paused: () => st.s !== 'playing', destroy: () => p.destroy(), noRate: true };
+    } catch (e) { if (playing !== token) return; ad = null; plainFrame(); return; }
   } else {
     plainFrame();
     return;
   }
   if (playing !== token) return;
+  if (ad.noRate) { $('#cRate').disabled = true; $('#cRate').title = 'Ennél a forrásnál a sebesség nem állítható'; }
   try { ad.rate(savedRate); } catch (e) {}
   startPoll();
 }
@@ -681,9 +710,15 @@ $('#cSeek').addEventListener('change', e => {
 });
 function toggleFull() {
   const st = $('#stage');
-  if (document.fullscreenElement) document.exitFullscreen();
-  else if (st.requestFullscreen) st.requestFullscreen();
+  if (document.fullscreenElement || document.webkitFullscreenElement) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+  if (st.requestFullscreen) st.requestFullscreen();
   else if (st.webkitRequestFullscreen) st.webkitRequestFullscreen();
+  else {
+    // iPhone: csak a <video> elem mehet teljes képernyőre
+    const v = $('#player video');
+    if (v && v.webkitEnterFullscreen) v.webkitEnterFullscreen();
+    else toast('iPhone-on a teljes képernyőhöz használd a lejátszó saját gombját');
+  }
 }
 $('#cFull').onclick = toggleFull;
 document.addEventListener('keydown', e => {
