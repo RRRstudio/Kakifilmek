@@ -69,10 +69,17 @@
   .player video{cursor:pointer}
   #stage:fullscreen{display:flex;flex-direction:column;background:#000;justify-content:center}
   #stage:fullscreen .player{aspect-ratio:auto;flex:1;border:0;border-radius:0}
-  #stage:fullscreen .ctl{margin:0;border-radius:0}
+  #stage{position:relative}
+  .ctl{transition:opacity .3s}
+  .shield{position:absolute;inset:0;z-index:2;cursor:pointer}
+  #stage.idle .ctl{opacity:0;pointer-events:none}
+  #stage.idle{cursor:none}
+  #stage:fullscreen .ctl{position:absolute;left:0;right:0;bottom:0;margin:0;border:0;border-radius:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:28px 14px 12px}
+  #stage:fullscreen .ctl.lite{position:static;background:var(--panel);padding:8px 10px}
   #stage:-webkit-full-screen{display:flex;flex-direction:column;background:#000;justify-content:center}
   #stage:-webkit-full-screen .player{aspect-ratio:auto;flex:1;border:0;border-radius:0}
-  #stage:-webkit-full-screen .ctl{margin:0;border-radius:0}
+  #stage:-webkit-full-screen .ctl{position:absolute;left:0;right:0;bottom:0;margin:0;border:0;border-radius:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:28px 14px 12px}
+  #stage:-webkit-full-screen .ctl.lite{position:static;background:var(--panel);padding:8px 10px}
   .overlay{-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom)}
   .ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px 10px}
   .ctl .cb{padding:8px 12px;font-size:14px;background:var(--panel2);color:var(--text);font-weight:600}
@@ -596,6 +603,9 @@ function startPoll() {
       $('#cSeek').value = d ? Math.round(t / d * 1000) : 0;
       $('#cTime').textContent = fmt(t) + ' / ' + fmt(d);
       $('#cPlay').textContent = ad.paused() ? '▶' : '⏸';
+      const stg = $('#stage');
+      if (!ad.autoHide || ad.paused()) stg.classList.remove('idle');
+      else if (Date.now() - lastMove > 3000 && !$('#ctl').matches(':hover')) stg.classList.add('idle');
     } catch (e) {}
   }, 400);
 }
@@ -603,6 +613,7 @@ function destroyCtl() {
   stopPoll();
   if (ad && ad.destroy) { try { ad.destroy(); } catch (e) {} }
   ad = null; dragging = false;
+  $('#stage').classList.remove('idle');
   $('#cRate').disabled = false; $('#cRate').title = 'Sebesség';
   if (hls) { hls.destroy(); hls = null; }
   $('#player').innerHTML = '';
@@ -631,7 +642,7 @@ async function buildPlayer(it) {
     v.addEventListener('loadedmetadata', () => { v.playbackRate = savedRate; });
     v.addEventListener('click', () => ad && ad.toggle());
     box.appendChild(v);
-    ad = { toggle: () => (v.paused ? v.play() : v.pause()), time: () => v.currentTime, dur: () => v.duration, seek: t => { v.currentTime = t; }, rate: r => { v.playbackRate = r; }, paused: () => v.paused };
+    ad = { toggle: () => (v.paused ? v.play() : v.pause()), time: () => v.currentTime, dur: () => v.duration, seek: t => { v.currentTime = t; }, rate: r => { v.playbackRate = r; }, paused: () => v.paused, autoHide: true };
   } else if (it.type === 'youtube') {
     const vid = (it.src.match(/embed\/([\w-]{11})/) || [])[1];
     try {
@@ -644,7 +655,7 @@ async function buildPlayer(it) {
           playerVars: { autoplay: 1, controls: NOFS ? 1 : 0, rel: 0, modestbranding: 1, playsinline: 1 },
           events: {
             onReady: () => {
-              ad = { toggle: () => (p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo()), time: () => p.getCurrentTime(), dur: () => p.getDuration(), seek: t => p.seekTo(t, true), rate: r => p.setPlaybackRate(r), paused: () => p.getPlayerState() !== 1, destroy: () => p.destroy() };
+              ad = { toggle: () => (p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo()), time: () => p.getCurrentTime(), dur: () => p.getDuration(), seek: t => p.seekTo(t, true), rate: r => p.setPlaybackRate(r), paused: () => p.getPlayerState() !== 1, destroy: () => p.destroy(), autoHide: !NOFS };
               res();
             },
             onError: () => rej(new Error('yt'))
@@ -652,6 +663,8 @@ async function buildPlayer(it) {
         });
       }), timeout(10000)]);
       if (playing !== token) { try { ad.destroy(); } catch (e) {} ad = null; return; }
+      // átlátszó réteg: így az egérmozgás és a kattintás (lejátszás/szünet, dupla kattintás = teljes képernyő) a mi oldalunkon marad
+      if (!NOFS) { const sh = document.createElement('div'); sh.className = 'shield'; sh.onclick = () => ad && ad.toggle(); sh.ondblclick = toggleFull; box.appendChild(sh); }
     } catch (e) { if (playing !== token) return; ad = null; plainFrame(); return; }
   } else if (it.type === 'vimeo') {
     const id = (it.src.match(/video\/(\d+)/) || [])[1];
@@ -691,6 +704,9 @@ async function buildPlayer(it) {
   startPoll();
 }
 
+// ha egy ideig nem mozog az egér / nincs érintés, a vezérlősor elhalványul (csak lejátszás közben)
+let lastMove = Date.now();
+['mousemove', 'touchstart', 'keydown', 'click'].forEach(ev => $('#stage').addEventListener(ev, () => { lastMove = Date.now(); $('#stage').classList.remove('idle'); }, { passive: true }));
 $('#cPlay').onclick = () => ad && ad.toggle();
 $('#cBack').onclick = () => { if (ad) ad.seek(Math.max(0, ad.time() - 10)); };
 $('#cFwd').onclick = () => { if (ad) { const d = ad.dur(); ad.seek(d ? Math.min(d, ad.time() + 10) : ad.time() + 10); } };
