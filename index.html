@@ -2,10 +2,7 @@
 <html lang="hu">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2a1a0f">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Kakifilmek">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kakifilmek – A legszipiszupibb oldal</title>
 <style>
   :root{--bg:#2a1a0f;--panel:#3b2616;--panel2:#4a3020;--text:#f6e7d3;--muted:#c2a27f;--accent:#c68642;--accent2:#e8b04a;--line:#5a3b25}
@@ -17,7 +14,7 @@
   .brand{line-height:1.1}
   .slogan{font-size:12px;color:var(--muted);font-style:italic;margin:3px 0 0 32px}
   form#addForm{flex:1;display:flex;flex-wrap:wrap;gap:8px;min-width:260px}
-  input{padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:16px;outline:none;width:100%;font-family:inherit}
+  input{padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;outline:none;width:100%;font-family:inherit}
   form#addForm input#url{flex:1 1 220px;width:auto}
   form#addForm input#name{flex:0 1 200px;width:auto}
   .srow{display:flex;gap:8px;flex-basis:100%}
@@ -66,30 +63,6 @@
   .ov-top a{color:var(--muted);font-size:13px}
   .player{background:#000;border:4px solid var(--accent);border-radius:18px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
   .player iframe,.player video{width:100%;height:100%;border:0;background:#000}
-  .player video{cursor:pointer}
-  #stage:fullscreen{display:flex;flex-direction:column;background:#000;justify-content:center}
-  #stage:fullscreen .player{aspect-ratio:auto;flex:1;border:0;border-radius:0}
-  #stage{position:relative}
-  .ctl{transition:opacity .3s}
-  .shield{position:absolute;inset:0;z-index:2;cursor:pointer}
-  #stage.idle .ctl{opacity:0;pointer-events:none}
-  #stage.idle{cursor:none}
-  #stage:fullscreen .ctl{position:absolute;left:0;right:0;bottom:0;margin:0;border:0;border-radius:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:28px 14px 12px}
-  #stage:fullscreen .ctl.lite{position:static;background:var(--panel);padding:8px 10px}
-  #stage:-webkit-full-screen{display:flex;flex-direction:column;background:#000;justify-content:center}
-  #stage:-webkit-full-screen .player{aspect-ratio:auto;flex:1;border:0;border-radius:0}
-  #stage:-webkit-full-screen .ctl{position:absolute;left:0;right:0;bottom:0;margin:0;border:0;border-radius:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:28px 14px 12px}
-  #stage:-webkit-full-screen .ctl.lite{position:static;background:var(--panel);padding:8px 10px}
-  .overlay{-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom)}
-  .ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px 10px}
-  .ctl .cb{padding:8px 12px;font-size:14px;background:var(--panel2);color:var(--text);font-weight:600}
-  .ctl input[type=range]{flex:1 1 160px;width:auto;padding:0;accent-color:var(--accent2);background:none;border:0}
-  .ctl select{font-size:16px;width:auto;padding:7px 8px;border-radius:8px;background:var(--panel2);color:var(--text);border:1px solid var(--line);font-family:inherit}
-  #cTime{font-size:13px;color:var(--muted);min-width:92px;text-align:center}
-  #cNote{display:none;font-size:13px;color:var(--muted)}
-  .ctl.lite > *{display:none}
-  .ctl.lite > #cNote,.ctl.lite > #cFull{display:block}
-  .ctl.lite > #cNote{flex:1}
   .ov-nav{display:none;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
   .ov-nav span{color:var(--muted);font-size:14px;text-align:center;flex:1}
   .hint{background:var(--panel);border-radius:10px;padding:10px 14px;color:var(--muted);font-size:13px;display:none;margin-top:12px}
@@ -150,22 +123,7 @@
       <h2 id="nowTitle"></h2>
       <a id="nowLink" href="#" target="_blank" rel="noopener">Megnyitás új lapon ↗</a>
     </div>
-    <div id="stage">
-      <div class="player" id="player"></div>
-      <div class="ctl" id="ctl">
-        <button class="cb" id="cPlay" title="Lejátszás / szünet (szóköz)">▶</button>
-        <button class="cb" id="cBack" title="10 mp vissza (←)">⏪ 10</button>
-        <button class="cb" id="cFwd" title="10 mp előre (→)">10 ⏩</button>
-        <input type="range" id="cSeek" min="0" max="1000" value="0">
-        <span id="cTime">0:00 / 0:00</span>
-        <select id="cRate" title="Sebesség">
-          <option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option>
-          <option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option>
-        </select>
-        <span id="cNote">Ennél a forrásnál a saját vezérlés nem érhető el.</span>
-        <button class="cb" id="cFull" title="Teljes képernyő (F)">⛶</button>
-      </div>
-    </div>
+    <div class="player" id="player"></div>
     <div class="ov-nav" id="ovNav">
       <button class="ghost" id="prevBtn">⏮ Előző rész</button>
       <span id="nowSub"></span>
@@ -548,7 +506,17 @@ function openPlayer(id) {
   if (playing === id) return;
   closePlayer(true);
   playing = id;
-  buildPlayer(it);
+  const box = $('#player'); box.innerHTML = '';
+  if (it.type === 'file' || it.type === 'hls') {
+    const v = document.createElement('video'); v.controls = true; v.autoplay = true; v.playsInline = true;
+    if (it.type === 'hls' && window.Hls && Hls.isSupported()) { hls = new Hls(); hls.loadSource(it.src); hls.attachMedia(v); }
+    else v.src = it.src;
+    box.appendChild(v);
+  } else {
+    const f = document.createElement('iframe');
+    f.src = it.src; f.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'; f.allowFullscreen = true;
+    box.appendChild(f);
+  }
   $('#nowTitle').textContent = it.title;
   $('#nowLink').href = it.url;
   $('#hint').style.display = it.type === 'iframe' ? 'block' : 'none';
@@ -570,185 +538,9 @@ function openPlayer(id) {
   $('#overlay').classList.add('open'); $('#overlay').scrollTop = 0;
   document.body.style.overflow = 'hidden';
 }
-// ---- saját lejátszó-vezérlés ----
-// iPhone Safari: nincs Fullscreen API sima elemekre, ott a YouTube saját gombjait is megtartjuk
-const NOFS = !(document.fullscreenEnabled || document.webkitFullscreenEnabled);
-let ad = null, pollT = null, ytReady = null, vmReady = null, vkReady = null, dragging = false, savedRate = 1;
-try { savedRate = parseFloat(localStorage.getItem('mozi-rate')) || 1; } catch (e) {}
-$('#cRate').value = String(savedRate);
-const fmt = s => { s = Math.max(0, Math.floor(s || 0)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); };
-function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
-function loadYT() {
-  if (window.YT && YT.Player) return Promise.resolve();
-  if (!ytReady) ytReady = new Promise((res, rej) => { window.onYouTubeIframeAPIReady = res; loadScript('https://www.youtube.com/iframe_api').catch(rej); });
-  return ytReady;
-}
-function loadVimeo() {
-  if (window.Vimeo && Vimeo.Player) return Promise.resolve();
-  if (!vmReady) vmReady = loadScript('https://player.vimeo.com/api/player.js');
-  return vmReady;
-}
-function loadVK() {
-  if (window.VK && VK.VideoPlayer) return Promise.resolve();
-  if (!vkReady) vkReady = loadScript('https://vk.com/js/api/videoplayer.js');
-  return vkReady;
-}
-function stopPoll() { if (pollT) { clearInterval(pollT); pollT = null; } }
-function startPoll() {
-  stopPoll();
-  pollT = setInterval(() => {
-    if (!ad || dragging) return;
-    try {
-      const d = ad.dur() || 0, t = ad.time() || 0;
-      $('#cSeek').value = d ? Math.round(t / d * 1000) : 0;
-      $('#cTime').textContent = fmt(t) + ' / ' + fmt(d);
-      $('#cPlay').textContent = ad.paused() ? '▶' : '⏸';
-      const stg = $('#stage');
-      if (!ad.autoHide || ad.paused()) stg.classList.remove('idle');
-      else if (Date.now() - lastMove > 3000 && !$('#ctl').matches(':hover')) stg.classList.add('idle');
-    } catch (e) {}
-  }, 400);
-}
-function destroyCtl() {
-  stopPoll();
-  if (ad && ad.destroy) { try { ad.destroy(); } catch (e) {} }
-  ad = null; dragging = false;
-  $('#stage').classList.remove('idle');
-  $('#cRate').disabled = false; $('#cRate').title = 'Sebesség';
+function closePlayer(keepOpenState) {
   if (hls) { hls.destroy(); hls = null; }
   $('#player').innerHTML = '';
-  $('#cSeek').value = 0; $('#cTime').textContent = '0:00 / 0:00'; $('#cPlay').textContent = '▶';
-}
-async function buildPlayer(it) {
-  destroyCtl();
-  const token = playing;
-  const box = $('#player');
-  const ctl = $('#ctl');
-  const expectFull = ['file', 'hls', 'youtube', 'vimeo', 'vk'].includes(it.type);
-  ctl.classList.toggle('lite', !expectFull);
-  const plainFrame = () => {
-    box.innerHTML = '';
-    const f = document.createElement('iframe');
-    f.src = it.src; f.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'; f.allowFullscreen = true;
-    box.appendChild(f);
-    ctl.classList.add('lite');
-  };
-  const timeout = ms => new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
-
-  if (it.type === 'file' || it.type === 'hls') {
-    const v = document.createElement('video'); v.autoplay = true; v.playsInline = true; v.setAttribute('webkit-playsinline', '');
-    if (it.type === 'hls' && window.Hls && Hls.isSupported()) { hls = new Hls(); hls.loadSource(it.src); hls.attachMedia(v); }
-    else v.src = it.src;
-    v.addEventListener('loadedmetadata', () => { v.playbackRate = savedRate; });
-    v.addEventListener('click', () => ad && ad.toggle());
-    box.appendChild(v);
-    ad = { toggle: () => (v.paused ? v.play() : v.pause()), time: () => v.currentTime, dur: () => v.duration, seek: t => { v.currentTime = t; }, rate: r => { v.playbackRate = r; }, paused: () => v.paused, autoHide: true };
-  } else if (it.type === 'youtube') {
-    const vid = (it.src.match(/embed\/([\w-]{11})/) || [])[1];
-    try {
-      await loadYT();
-      if (playing !== token) return;
-      const mount = document.createElement('div'); box.appendChild(mount);
-      await Promise.race([new Promise((res, rej) => {
-        const p = new YT.Player(mount, {
-          videoId: vid, width: '100%', height: '100%',
-          playerVars: { autoplay: 1, controls: NOFS ? 1 : 0, rel: 0, modestbranding: 1, playsinline: 1 },
-          events: {
-            onReady: () => {
-              ad = { toggle: () => (p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo()), time: () => p.getCurrentTime(), dur: () => p.getDuration(), seek: t => p.seekTo(t, true), rate: r => p.setPlaybackRate(r), paused: () => p.getPlayerState() !== 1, destroy: () => p.destroy(), autoHide: !NOFS };
-              res();
-            },
-            onError: () => rej(new Error('yt'))
-          }
-        });
-      }), timeout(10000)]);
-      if (playing !== token) { try { ad.destroy(); } catch (e) {} ad = null; return; }
-      // átlátszó réteg: így az egérmozgás és a kattintás (lejátszás/szünet, dupla kattintás = teljes képernyő) a mi oldalunkon marad
-      if (!NOFS) { const sh = document.createElement('div'); sh.className = 'shield'; sh.onclick = () => ad && ad.toggle(); sh.ondblclick = toggleFull; box.appendChild(sh); }
-    } catch (e) { if (playing !== token) return; ad = null; plainFrame(); return; }
-  } else if (it.type === 'vimeo') {
-    const id = (it.src.match(/video\/(\d+)/) || [])[1];
-    try {
-      await loadVimeo();
-      if (playing !== token) return;
-      const mount = document.createElement('div'); mount.style.cssText = 'width:100%;height:100%'; box.appendChild(mount);
-      const p = new Vimeo.Player(mount, { id: Number(id), autoplay: true });
-      const st = { t: 0, d: 0, paused: true };
-      p.on('timeupdate', d => { st.t = d.seconds; st.d = d.duration; });
-      p.on('play', () => { st.paused = false; });
-      p.on('pause', () => { st.paused = true; });
-      await Promise.race([p.ready(), timeout(10000)]);
-      if (playing !== token) { try { p.destroy(); } catch (e) {} return; }
-      ad = { toggle: () => (st.paused ? p.play() : p.pause()), time: () => st.t, dur: () => st.d, seek: t => p.setCurrentTime(t), rate: r => p.setPlaybackRate(r), paused: () => st.paused, destroy: () => p.destroy() };
-    } catch (e) { if (playing !== token) return; ad = null; plainFrame(); return; }
-  } else if (it.type === 'vk') {
-    try {
-      await loadVK();
-      if (playing !== token) return;
-      const f = document.createElement('iframe');
-      f.src = it.src + '&js_api=1'; f.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'; f.allowFullscreen = true;
-      box.appendChild(f);
-      const p = VK.VideoPlayer(f);
-      const st = { t: 0, d: 0, s: 'unstarted' };
-      const upd = s => { if (!s) return; if (typeof s.time === 'number') st.t = s.time; if (typeof s.duration === 'number') st.d = s.duration; if (s.state) st.s = s.state; };
-      ['inited', 'timeupdate', 'started', 'resumed', 'paused', 'ended'].forEach(ev => p.on(ev, upd));
-      ad = { toggle: () => (st.s === 'playing' ? p.pause() : p.play()), time: () => st.t, dur: () => st.d || p.getDuration(), seek: t => p.seek(t), rate: () => {}, paused: () => st.s !== 'playing', destroy: () => p.destroy(), noRate: true };
-    } catch (e) { if (playing !== token) return; ad = null; plainFrame(); return; }
-  } else {
-    plainFrame();
-    return;
-  }
-  if (playing !== token) return;
-  if (ad.noRate) { $('#cRate').disabled = true; $('#cRate').title = 'Ennél a forrásnál a sebesség nem állítható'; }
-  try { ad.rate(savedRate); } catch (e) {}
-  startPoll();
-}
-
-// ha egy ideig nem mozog az egér / nincs érintés, a vezérlősor elhalványul (csak lejátszás közben)
-let lastMove = Date.now();
-['mousemove', 'touchstart', 'keydown', 'click'].forEach(ev => $('#stage').addEventListener(ev, () => { lastMove = Date.now(); $('#stage').classList.remove('idle'); }, { passive: true }));
-$('#cPlay').onclick = () => ad && ad.toggle();
-$('#cBack').onclick = () => { if (ad) ad.seek(Math.max(0, ad.time() - 10)); };
-$('#cFwd').onclick = () => { if (ad) { const d = ad.dur(); ad.seek(d ? Math.min(d, ad.time() + 10) : ad.time() + 10); } };
-$('#cRate').onchange = e => {
-  savedRate = parseFloat(e.target.value) || 1;
-  try { localStorage.setItem('mozi-rate', String(savedRate)); } catch (err) {}
-  if (ad) ad.rate(savedRate);
-  e.target.blur();
-};
-$('#cSeek').addEventListener('input', e => {
-  dragging = true;
-  if (ad) { const d = ad.dur() || 0; $('#cTime').textContent = fmt(d * e.target.value / 1000) + ' / ' + fmt(d); }
-});
-$('#cSeek').addEventListener('change', e => {
-  if (ad) { const d = ad.dur() || 0; if (d) ad.seek(d * e.target.value / 1000); }
-  dragging = false; e.target.blur();
-});
-function toggleFull() {
-  const st = $('#stage');
-  if (document.fullscreenElement || document.webkitFullscreenElement) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
-  if (st.requestFullscreen) st.requestFullscreen();
-  else if (st.webkitRequestFullscreen) st.webkitRequestFullscreen();
-  else {
-    // iPhone: csak a <video> elem mehet teljes képernyőre
-    const v = $('#player video');
-    if (v && v.webkitEnterFullscreen) v.webkitEnterFullscreen();
-    else toast('iPhone-on a teljes képernyőhöz használd a lejátszó saját gombját');
-  }
-}
-$('#cFull').onclick = toggleFull;
-document.addEventListener('keydown', e => {
-  if (!$('#overlay').classList.contains('open') || document.querySelector('dialog[open]')) return;
-  if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
-  if (e.key === 'f' || e.key === 'F') { toggleFull(); return; }
-  if (!ad) return;
-  if (e.key === ' ') { e.preventDefault(); ad.toggle(); }
-  else if (e.key === 'ArrowLeft') { e.preventDefault(); $('#cBack').click(); }
-  else if (e.key === 'ArrowRight') { e.preventDefault(); $('#cFwd').click(); }
-});
-
-function closePlayer(keepOpenState) {
-  destroyCtl();
   playing = null;
   if (!keepOpenState) { $('#overlay').classList.remove('open'); document.body.style.overflow = ''; }
 }
