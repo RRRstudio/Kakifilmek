@@ -71,7 +71,7 @@
     <div class="slogan">A legszipiszupibb oldal</div>
   </div>
   <form id="addForm">
-    <input id="url" type="url" placeholder="Illeszd be a kakifilm linkjét…" required autocomplete="off">
+    <input id="url" type="text" inputmode="url" placeholder="Illeszd be a kakifilm linkjét vagy iframe kódját…" required autocomplete="off">
     <input id="name" type="text" placeholder="Cím (nem kötelező)" style="max-width:220px">
     <button type="submit" id="addBtn">Hozzáad 💩</button>
   </form>
@@ -167,9 +167,18 @@ async function loadItems() {
     sha = j.sha;
     items = JSON.parse(b64decode(j.content) || '[]');
   } else {
-    const r = await fetch(FILE + '?t=' + Date.now(), { cache: 'no-store' });
-    items = r.ok ? await r.json() : [];
-    sha = null;
+    sha = null; items = [];
+    let ok = false;
+    // látogatóknak is a GitHubról olvas közvetlenül (nincs Pages-késés), tartaléknak a sima fájl
+    if (cfg.owner && cfg.repo) {
+      try {
+        const r = await fetch(apiUrl() + (cfg.branch ? '?ref=' + encodeURIComponent(cfg.branch) + '&' : '?') + 't=' + Date.now(), { headers: { 'Accept': 'application/vnd.github+json' }, cache: 'no-store' });
+        if (r.ok) { items = JSON.parse(b64decode((await r.json()).content) || '[]'); ok = true; }
+      } catch (e) {}
+    }
+    if (!ok) {
+      try { const r = await fetch(FILE + '?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) items = await r.json(); } catch (e) {}
+    }
   }
   if (!Array.isArray(items)) items = [];
 }
@@ -209,6 +218,8 @@ function parse(url) {
     return { type: 'dailymotion', src: 'https://www.dailymotion.com/embed/video/' + m[1] + '?autoplay=1', label: 'Dailymotion' };
   if ((m = url.match(/(?:vk\.com|vkvideo\.ru)\/.*?(?:video|clip)(-?\d+)_(\d+)(?:.*?[?&]hash=([a-f0-9]+))?/i)))
     return { type: 'vk', src: 'https://vk.com/video_ext.php?oid=' + m[1] + '&id=' + m[2] + (m[3] ? '&hash=' + m[3] : '') + '&hd=2&autoplay=1', label: 'VK' };
+  if ((m = url.match(/embed\.indavideo\.hu\/player\/video\/([a-z0-9]+)/i)))
+    return { type: 'indavideo', src: 'https://embed.indavideo.hu/player/video/' + m[1], label: 'Indavideo' };
   try {
     const x = new URL(url);
     if (/(^|\.)(videa|videakid)\.hu$/i.test(x.hostname)) {
@@ -230,9 +241,17 @@ async function fetchTitle(url) {
 }
 
 // ---- műveletek ----
+// Elfogad sima linket és teljes <iframe …> beágyazó kódot is
+function normalizeInput(s) {
+  s = (s || '').trim();
+  const m = s.match(/<iframe[^>]*?\ssrc\s*=\s*["']([^"']+)["']/i);
+  if (m) s = m[1].trim();
+  if (s.startsWith('//')) s = 'https:' + s;
+  return s;
+}
 let busy = false;
 async function addItem(url, name) {
-  url = url.trim();
+  url = normalizeInput(url);
   if (!/^https?:\/\//i.test(url)) { toast('Érvényes linket adj meg (http/https)'); return; }
   if (!editable()) { toast('Szerkesztéshez add meg a tokent (⚙)'); openCfg(); return; }
   if (busy) return; busy = true; $('#addBtn').disabled = true;
@@ -242,6 +261,7 @@ async function addItem(url, name) {
     const p = parse(url);
     let title = name && name.trim();
     if (!title && ['youtube', 'vimeo', 'dailymotion'].includes(p.type)) title = await fetchTitle(url);
+    if (!title && ['indavideo', 'videa', 'vk'].includes(p.type)) title = p.label + ' videó';
     if (!title) title = fallbackTitle(url);
     const item = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url, title, ...p };
     if (await mutate(arr => arr.some(i => i.url === url) ? arr : [item, ...arr], 'Hozzáadva: ' + title.slice(0, 60))) {
@@ -349,9 +369,10 @@ $('#addForm').addEventListener('submit', async e => {
 });
 $('#url').addEventListener('paste', e => {
   const txt = (e.clipboardData || window.clipboardData).getData('text').trim();
-  if (/^https?:\/\/\S+$/i.test(txt) && !$('#name').value.trim()) {
+  const n = normalizeInput(txt);
+  if (/^https?:\/\/\S+$/i.test(n) && !$('#name').value.trim()) {
     e.preventDefault();
-    addItem(txt, '').then(() => { $('#url').value = ''; });
+    addItem(n, '').then(() => { $('#url').value = ''; });
   }
 });
 
@@ -376,4 +397,3 @@ init();
 </script>
 </body>
 </html>
-
