@@ -13,9 +13,13 @@
   h1 span{color:var(--accent2)}
   .brand{line-height:1.1}
   .slogan{font-size:12px;color:var(--muted);font-style:italic;margin:3px 0 0 32px}
-  form#addForm{flex:1;display:flex;gap:8px;min-width:260px}
+  form#addForm{flex:1;display:flex;flex-wrap:wrap;gap:8px;min-width:260px}
   input{padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;outline:none;width:100%;font-family:inherit}
-  form#addForm input#url{flex:1}
+  form#addForm input#url{flex:1 1 220px;width:auto}
+  form#addForm input#name{flex:0 1 200px;width:auto}
+  .srow{display:flex;gap:8px;flex-basis:100%}
+  .srow input#series{flex:1}
+  .srow input[type=number]{width:90px;flex:none}
   input:focus{border-color:var(--accent2)}
   button{padding:11px 18px;border:0;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#2a1a0f;font-weight:700;cursor:pointer;font-size:15px;font-family:inherit}
   button.ghost{background:var(--panel2);color:var(--text);font-weight:500;padding:9px 14px;font-size:14px}
@@ -25,23 +29,30 @@
   .badge.on{background:#4a4a1e;color:#d6d36a}
 
   main{padding:22px 20px 60px;max-width:1600px;margin:0 auto}
-  .bar{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
-  .bar h2{margin:0;font-size:22px}
-  .bar input{max-width:340px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
+  .bar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+  .bar h2{margin:0;font-size:22px;flex:1;min-width:160px}
+  .bar input{max-width:300px}
+  .chips{display:flex;gap:6px}
+  .chip{padding:8px 14px;font-size:14px;background:var(--panel2);color:var(--text);font-weight:500}
+  .chip.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#2a1a0f;font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-bottom:26px}
   @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .season h3{margin:6px 0 12px;font-size:19px;color:var(--accent2)}
   .card{background:var(--panel);border:3px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;position:relative}
   .card:hover{transform:translateY(-5px);border-color:var(--accent2);box-shadow:0 10px 24px rgba(0,0,0,.45)}
   .pic{aspect-ratio:16/9;background:#000 center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:72px;position:relative}
   .pic.nothumb{background:linear-gradient(135deg,#5a3b25,#3b2616)}
   .pic .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:58px;color:#fff;background:rgba(0,0,0,.35);opacity:0;transition:opacity .2s}
   .card:hover .play{opacity:1}
+  .tag{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.72);color:var(--accent2);font-size:13px;font-weight:700;padding:3px 9px;border-radius:8px}
   .info{padding:12px 14px 14px}
   .title{font-size:17px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:2.5em}
   .src{font-size:12px;color:var(--muted);margin-top:6px}
-  .del{position:absolute;top:8px;right:8px;width:32px;height:32px;padding:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:18px;line-height:1;opacity:0;transition:opacity .2s}
-  .card:hover .del{opacity:1}
-  @media(hover:none){.del{opacity:1}}
+  .cbtn{position:absolute;top:8px;width:32px;height:32px;padding:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:16px;line-height:1;opacity:0;transition:opacity .2s}
+  .cbtn.del{right:8px;font-size:18px}
+  .cbtn.edit{right:46px}
+  .card:hover .cbtn{opacity:1}
+  @media(hover:none){.cbtn{opacity:1}}
   .empty{color:var(--muted);text-align:center;padding:40px 20px;grid-column:1/-1;font-size:16px}
 
   .overlay{position:fixed;inset:0;background:var(--bg);z-index:20;overflow:auto;display:none}
@@ -52,6 +63,8 @@
   .ov-top a{color:var(--muted);font-size:13px}
   .player{background:#000;border:4px solid var(--accent);border-radius:18px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
   .player iframe,.player video{width:100%;height:100%;border:0;background:#000}
+  .ov-nav{display:none;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .ov-nav span{color:var(--muted);font-size:14px;text-align:center;flex:1}
   .hint{background:var(--panel);border-radius:10px;padding:10px 14px;color:var(--muted);font-size:13px;display:none;margin-top:12px}
 
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);padding:10px 18px;border-radius:10px;opacity:0;transition:.3s;pointer-events:none;z-index:50}
@@ -72,29 +85,50 @@
   </div>
   <form id="addForm">
     <input id="url" type="text" inputmode="url" placeholder="Illeszd be a kakifilm linkjét vagy iframe kódját…" required autocomplete="off">
-    <input id="name" type="text" placeholder="Cím (nem kötelező)" style="max-width:220px">
+    <input id="name" type="text" placeholder="Cím (nem kötelező)">
     <button type="submit" id="addBtn">Hozzáad 💩</button>
+    <div class="srow">
+      <input id="series" type="text" list="seriesNames" placeholder="Sorozat neve (csak ha sorozat része)" autocomplete="off">
+      <input id="season" type="number" min="1" placeholder="Évad">
+      <input id="episode" type="number" min="1" placeholder="Rész">
+    </div>
   </form>
   <span class="badge" id="badge">csak olvasás</span>
   <button class="ghost" id="cfgBtn" title="Beállítások">⚙</button>
 </header>
+<datalist id="seriesNames"></datalist>
 
 <main>
-  <div class="bar">
+  <div class="bar" id="mainBar">
     <h2 id="count">Kakilista</h2>
-    <input id="search" type="search" placeholder="Keresés a kakifilmek között…" autocomplete="off">
+    <div class="chips" id="chips">
+      <button class="chip" data-f="all">Mind</button>
+      <button class="chip" data-f="film">Filmek</button>
+      <button class="chip" data-f="series">Sorozatok</button>
+    </div>
+    <input id="search" type="search" placeholder="Keresés…" autocomplete="off">
   </div>
-  <div class="grid" id="grid"></div>
+  <div class="bar" id="seriesBar" style="display:none">
+    <button class="ghost" id="seriesBack">← Vissza a kakilistához</button>
+    <h2 id="seriesTitle"></h2>
+    <button class="ghost" id="seriesDel">Sorozat törlése</button>
+  </div>
+  <div id="content"></div>
 </main>
 
 <div class="overlay" id="overlay">
   <div class="ov-inner">
     <div class="ov-top">
-      <button class="ghost" id="backBtn">← Vissza a kakilistához</button>
+      <button class="ghost" id="backBtn">← Vissza</button>
       <h2 id="nowTitle"></h2>
       <a id="nowLink" href="#" target="_blank" rel="noopener">Megnyitás új lapon ↗</a>
     </div>
     <div class="player" id="player"></div>
+    <div class="ov-nav" id="ovNav">
+      <button class="ghost" id="prevBtn">⏮ Előző rész</button>
+      <span id="nowSub"></span>
+      <button id="nextBtn">Következő rész ⏭</button>
+    </div>
     <div class="hint" id="hint">Ha a lejátszó üres marad, az az oldal valószínűleg nem engedi a beágyazást. Használd a „Megnyitás új lapon" linket.</div>
   </div>
 </div>
@@ -114,6 +148,22 @@
     <button class="ghost" id="cfgLogout" type="button">Token törlése</button>
     <button class="ghost" id="cfgCancel" type="button">Mégse</button>
     <button id="cfgSave" type="button">Mentés</button>
+  </div>
+</dialog>
+
+<dialog id="editDlg">
+  <h3>Szerkesztés</h3>
+  <label>Cím</label>
+  <input id="edTitle" type="text">
+  <label>Sorozat neve (üresen hagyva sima film)</label>
+  <input id="edSeries" type="text" list="seriesNames" autocomplete="off">
+  <label>Évad</label>
+  <input id="edSeason" type="number" min="1">
+  <label>Rész</label>
+  <input id="edEpisode" type="number" min="1">
+  <div class="row">
+    <button class="ghost" id="edCancel" type="button">Mégse</button>
+    <button id="edSave" type="button">Mentés</button>
   </div>
 </dialog>
 <div class="toast" id="toast"></div>
@@ -254,6 +304,17 @@ async function fetchTitle(url) {
   catch (e) { return null; }
 }
 
+// ---- sorozat segédek ----
+const skey = s => (s || '').trim().toLowerCase();
+const epCmp = (a, b) => (a.season || 1) - (b.season || 1) || (a.episode || 0) - (b.episode || 0);
+const episodesOf = name => items.filter(i => i.series && skey(i.series) === skey(name)).sort(epCmp);
+function updateNames() {
+  const names = []; const seen = new Set();
+  items.forEach(i => { if (i.series && !seen.has(skey(i.series))) { seen.add(skey(i.series)); names.push(i.series); } });
+  $('#seriesNames').innerHTML = '';
+  names.forEach(n => { const o = document.createElement('option'); o.value = n; $('#seriesNames').appendChild(o); });
+}
+
 // ---- műveletek ----
 // Elfogad sima linket és teljes <iframe …> beágyazó kódot is
 function normalizeInput(s) {
@@ -266,22 +327,36 @@ function normalizeInput(s) {
 let busy = false;
 async function addItem(url, name) {
   url = normalizeInput(url);
-  if (!/^https?:\/\//i.test(url)) { toast('Érvényes linket adj meg (http/https)'); return; }
-  if (!editable()) { toast('Szerkesztéshez add meg a tokent (⚙)'); openCfg(); return; }
-  if (busy) return; busy = true; $('#addBtn').disabled = true;
+  if (!/^https?:\/\//i.test(url)) { toast('Érvényes linket adj meg (http/https)'); return false; }
+  if (!editable()) { toast('Szerkesztéshez add meg a tokent (⚙)'); openCfg(); return false; }
+  if (busy) return false; busy = true; $('#addBtn').disabled = true;
   try {
     const dup = items.find(i => i.url === url);
-    if (dup) { toast('Ez már a listában van'); return; }
+    if (dup) { toast('Ez már a listában van'); return false; }
+    const series = $('#series').value.trim();
+    let season = 0, episode = 0;
+    if (series) {
+      season = parseInt($('#season').value) || 1;
+      episode = parseInt($('#episode').value) || 0;
+      if (!episode) {
+        const same = episodesOf(series).filter(e => (e.season || 1) === season);
+        episode = same.reduce((mx, e) => Math.max(mx, e.episode || 0), 0) + 1;
+      }
+    }
     const p = parse(url);
     let title = name && name.trim();
     if (!title && ['youtube', 'vimeo', 'dailymotion'].includes(p.type)) title = await fetchTitle(url);
+    if (!title && series) title = series + ' – ' + season + '. évad ' + episode + '. rész';
     if (!title && ['indavideo', 'videa', 'vk'].includes(p.type)) title = p.label + ' videó';
     if (!title) title = fallbackTitle(url);
     const item = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url, title, ...p };
+    if (series) { item.series = series; item.season = season; item.episode = episode; }
     if (await mutate(arr => arr.some(i => i.url === url) ? arr : [item, ...arr], 'Hozzáadva: ' + title.slice(0, 60))) {
       render(); toast('Hozzáadva ✔ 💩');
+      return true;
     }
-  } catch (e) { toast(e.message); }
+    return false;
+  } catch (e) { toast(e.message); return false; }
   finally { busy = false; $('#addBtn').disabled = false; }
 }
 async function removeItem(id) {
@@ -291,38 +366,141 @@ async function removeItem(id) {
   } catch (e) { toast(e.message); }
 }
 
-// ---- főoldal (rács) ----
+// ---- szerkesztés ----
+let editingId = null;
+function openEdit(id) {
+  const it = items.find(i => i.id === id); if (!it) return;
+  editingId = id;
+  $('#edTitle').value = it.title || ''; $('#edSeries').value = it.series || '';
+  $('#edSeason').value = it.season || ''; $('#edEpisode').value = it.episode || '';
+  $('#editDlg').showModal();
+}
+$('#edCancel').onclick = () => $('#editDlg').close();
+$('#edSave').onclick = async () => {
+  const title = $('#edTitle').value.trim(), series = $('#edSeries').value.trim();
+  const season = parseInt($('#edSeason').value) || 0, episode = parseInt($('#edEpisode').value) || 0;
+  const id = editingId;
+  $('#editDlg').close();
+  try {
+    await mutate(arr => arr.map(i => {
+      if (i.id !== id) return i;
+      const n = { ...i, title: title || i.title };
+      delete n.series; delete n.season; delete n.episode;
+      if (series) { n.series = series; n.season = season || 1; if (episode) n.episode = episode; }
+      return n;
+    }), 'Szerkesztve');
+    render();
+  } catch (e) { toast(e.message); }
+};
+
+// ---- főoldal / sorozat oldal ----
+let filter = 'all';
+let currentSeries = null;
+
+function makeCard(o) {
+  const card = document.createElement('div'); card.className = 'card';
+  const pic = document.createElement('div'); pic.className = 'pic' + (o.thumb ? '' : ' nothumb');
+  if (o.thumb) pic.style.backgroundImage = 'url(' + o.thumb + ')'; else pic.textContent = o.icon || '💩';
+  if (o.tag) { const tg = document.createElement('div'); tg.className = 'tag'; tg.textContent = o.tag; pic.appendChild(tg); }
+  const play = document.createElement('div'); play.className = 'play'; play.textContent = '▶';
+  pic.appendChild(play);
+  const info = document.createElement('div'); info.className = 'info';
+  const t = document.createElement('div'); t.className = 'title'; t.textContent = o.title;
+  const s = document.createElement('div'); s.className = 'src'; s.textContent = o.sub;
+  info.append(t, s);
+  card.append(pic, info);
+  if (editable() && o.id) {
+    const ed = document.createElement('button'); ed.className = 'cbtn edit'; ed.textContent = '✎'; ed.title = 'Szerkesztés';
+    ed.onclick = e => { e.stopPropagation(); openEdit(o.id); };
+    const del = document.createElement('button'); del.className = 'cbtn del'; del.textContent = '×'; del.title = 'Törlés';
+    del.onclick = e => { e.stopPropagation(); removeItem(o.id); };
+    card.append(ed, del);
+  }
+  card.onclick = o.onClick;
+  return card;
+}
+
 function render() {
-  $('#count').textContent = items.length ? 'Kakilista (' + items.length + ')' : 'Kakilista';
   const badge = $('#badge'); badge.textContent = editable() ? 'szerkesztő mód' : 'csak olvasás'; badge.classList.toggle('on', editable());
+  updateNames();
+  const isSeries = currentSeries !== null;
+  $('#mainBar').style.display = isSeries ? 'none' : '';
+  $('#seriesBar').style.display = isSeries ? '' : 'none';
+  const box = $('#content'); box.innerHTML = '';
+  if (isSeries) renderSeries(box); else renderMain(box);
+}
+
+function renderMain(box) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.f === filter));
+  const entries = []; const seen = new Set();
+  items.forEach(it => {
+    if (!it.series) entries.push({ kind: 'film', it });
+    else { const k = skey(it.series); if (!seen.has(k)) { seen.add(k); entries.push({ kind: 'series', name: it.series }); } }
+  });
+  $('#count').textContent = entries.length ? 'Kakilista (' + entries.length + ')' : 'Kakilista';
   const q = $('#search').value.trim().toLowerCase();
-  const shown = items.filter(i => !q || (i.title + ' ' + i.label).toLowerCase().includes(q));
-  const grid = $('#grid'); grid.innerHTML = '';
+  const shown = entries.filter(e => {
+    if (filter === 'film' && e.kind !== 'film') return false;
+    if (filter === 'series' && e.kind !== 'series') return false;
+    if (!q) return true;
+    if (e.kind === 'film') return (e.it.title + ' ' + e.it.label).toLowerCase().includes(q);
+    return (e.name + ' ' + episodesOf(e.name).map(x => x.title).join(' ')).toLowerCase().includes(q);
+  });
+  const grid = document.createElement('div'); grid.className = 'grid'; box.appendChild(grid);
   if (!items.length) { grid.innerHTML = '<div class="empty">Még üres, mint a vécépapír-tartó. Illessz be egy kakifilm linkjét fent 💩</div>'; return; }
   if (!shown.length) { grid.innerHTML = '<div class="empty">Nincs találat 💩</div>'; return; }
-  shown.forEach(it => {
-    const card = document.createElement('div'); card.className = 'card';
-    const pic = document.createElement('div'); pic.className = 'pic' + (it.thumb ? '' : ' nothumb');
-    if (it.thumb) pic.style.backgroundImage = 'url(' + it.thumb + ')'; else pic.textContent = '💩';
-    const play = document.createElement('div'); play.className = 'play'; play.textContent = '▶';
-    pic.appendChild(play);
-    const info = document.createElement('div'); info.className = 'info';
-    const t = document.createElement('div'); t.className = 'title'; t.textContent = it.title;
-    const s = document.createElement('div'); s.className = 'src'; s.textContent = it.label;
-    info.append(t, s);
-    card.append(pic, info);
-    if (editable()) {
-      const del = document.createElement('button'); del.className = 'del'; del.textContent = '×'; del.title = 'Törlés';
-      del.onclick = e => { e.stopPropagation(); removeItem(it.id); };
-      card.appendChild(del);
+  shown.forEach(e => {
+    if (e.kind === 'film') {
+      const it = e.it;
+      grid.appendChild(makeCard({ id: it.id, thumb: it.thumb, title: it.title, sub: it.label, onClick: () => { location.hash = it.id; } }));
+    } else {
+      const eps = episodesOf(e.name);
+      const th = (eps.find(x => x.thumb) || {}).thumb;
+      const seasons = new Set(eps.map(x => x.season || 1)).size;
+      grid.appendChild(makeCard({
+        thumb: th, icon: '📺', tag: '📺 SOROZAT', title: eps[0].series,
+        sub: (seasons > 1 ? seasons + ' évad · ' : '') + eps.length + ' rész',
+        onClick: () => { location.hash = 's/' + encodeURIComponent(e.name); }
+      }));
     }
-    card.onclick = () => { location.hash = it.id; };
-    grid.appendChild(card);
   });
 }
 
+function renderSeries(box) {
+  const eps = episodesOf(currentSeries);
+  $('#seriesTitle').textContent = '📺 ' + (eps[0] ? eps[0].series : currentSeries);
+  $('#seriesDel').style.display = editable() && eps.length ? '' : 'none';
+  if (!eps.length) { const g = document.createElement('div'); g.className = 'grid'; g.innerHTML = '<div class="empty">Ebben a sorozatban nincs rész 💩</div>'; box.appendChild(g); return; }
+  const bySeason = new Map();
+  eps.forEach(e => { const s = e.season || 1; if (!bySeason.has(s)) bySeason.set(s, []); bySeason.get(s).push(e); });
+  bySeason.forEach((list, s) => {
+    const sec = document.createElement('div'); sec.className = 'season';
+    const h = document.createElement('h3'); h.textContent = s + '. évad'; sec.appendChild(h);
+    const grid = document.createElement('div'); grid.className = 'grid'; sec.appendChild(grid);
+    list.forEach(it => {
+      grid.appendChild(makeCard({
+        id: it.id, thumb: it.thumb, tag: it.episode ? s + '×' + String(it.episode).padStart(2, '0') : s + '. évad',
+        title: it.title, sub: (it.episode ? it.episode + '. rész · ' : '') + it.label,
+        onClick: () => { location.hash = it.id; }
+      }));
+    });
+    box.appendChild(sec);
+  });
+}
+
+document.querySelectorAll('.chip').forEach(c => c.onclick = () => { filter = c.dataset.f; render(); });
+$('#seriesBack').onclick = () => { location.hash = ''; };
+$('#seriesDel').onclick = async () => {
+  const name = currentSeries; if (name === null) return;
+  const n = episodesOf(name).length;
+  if (!confirm('Biztosan törlöd az egész sorozatot (' + n + ' rész)?')) return;
+  try {
+    if (await mutate(arr => arr.filter(i => !(i.series && skey(i.series) === skey(name))), 'Sorozat törölve')) { location.hash = ''; render(); }
+  } catch (e) { toast(e.message); }
+};
+
 // ---- lejátszó nézet ----
-let hls = null, playing = null;
+let hls = null, playing = null, nav = {};
 function openPlayer(id) {
   const it = items.find(i => i.id === id); if (!it) { closePlayer(); return; }
   if (playing === id) return;
@@ -342,6 +520,21 @@ function openPlayer(id) {
   $('#nowTitle').textContent = it.title;
   $('#nowLink').href = it.url;
   $('#hint').style.display = it.type === 'iframe' ? 'block' : 'none';
+  // sorozat: előző / következő rész
+  nav = {};
+  const ovNav = $('#ovNav');
+  if (it.series) {
+    const eps = episodesOf(it.series); const i = eps.findIndex(e => e.id === it.id);
+    nav = { prev: eps[i - 1], next: eps[i + 1] };
+    ovNav.style.display = 'flex';
+    $('#prevBtn').style.visibility = nav.prev ? 'visible' : 'hidden';
+    $('#nextBtn').style.visibility = nav.next ? 'visible' : 'hidden';
+    $('#nowSub').textContent = it.series + ' · ' + (it.season || 1) + '. évad' + (it.episode ? ' ' + it.episode + '. rész' : '');
+    $('#backBtn').textContent = '← Vissza a sorozathoz';
+  } else {
+    ovNav.style.display = 'none';
+    $('#backBtn').textContent = '← Vissza a kakilistához';
+  }
   $('#overlay').classList.add('open'); $('#overlay').scrollTop = 0;
   document.body.style.overflow = 'hidden';
 }
@@ -351,14 +544,33 @@ function closePlayer(keepOpenState) {
   playing = null;
   if (!keepOpenState) { $('#overlay').classList.remove('open'); document.body.style.overflow = ''; }
 }
+function goBack() {
+  const it = items.find(i => i.id === playing);
+  location.hash = it && it.series ? 's/' + encodeURIComponent(it.series) : '';
+}
 function onHash() {
   const h = location.hash.slice(1);
-  if (h && items.some(i => i.id === h)) openPlayer(h); else closePlayer();
+  const prevSeries = currentSeries;
+  if (h.startsWith('s/')) {
+    let name = h.slice(2); try { name = decodeURIComponent(name); } catch (e) {}
+    currentSeries = name; closePlayer(); render(); window.scrollTo(0, 0);
+  } else if (h && items.some(i => i.id === h)) {
+    const it = items.find(i => i.id === h);
+    currentSeries = it.series ? it.series : null;
+    if (currentSeries !== prevSeries) render();
+    openPlayer(h);
+  } else {
+    currentSeries = null; closePlayer(); render();
+  }
 }
 window.addEventListener('hashchange', onHash);
-$('#backBtn').onclick = () => { location.hash = ''; };
+$('#backBtn').onclick = goBack;
+$('#prevBtn').onclick = () => { if (nav.prev) location.hash = nav.prev.id; };
+$('#nextBtn').onclick = () => { if (nav.next) location.hash = nav.next.id; };
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && $('#overlay').classList.contains('open') && !document.querySelector('dialog[open]')) location.hash = '';
+  if (e.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+  if ($('#overlay').classList.contains('open')) goBack();
+  else if (currentSeries !== null) location.hash = '';
 });
 $('#search').addEventListener('input', render);
 
@@ -376,17 +588,21 @@ $('#cfgSave').onclick = async () => {
 $('#cfgLogout').onclick = async () => { cfg.token = ''; saveCfg(); $('#cfgDlg').close(); await init(); toast('Token törölve'); };
 
 // ---- hozzáadás űrlap ----
+// siker után a sorozat és az évad marad (több rész egymás után), a rész száma automatikusan nő
+function afterAdd(ok) {
+  if (!ok) return;
+  $('#url').value = ''; $('#name').value = ''; $('#episode').value = '';
+}
 $('#addForm').addEventListener('submit', async e => {
   e.preventDefault();
-  await addItem($('#url').value, $('#name').value);
-  $('#url').value = ''; $('#name').value = '';
+  afterAdd(await addItem($('#url').value, $('#name').value));
 });
 $('#url').addEventListener('paste', e => {
   const txt = (e.clipboardData || window.clipboardData).getData('text').trim();
   const n = normalizeInput(txt);
   if (/^https?:\/\/\S+$/i.test(n) && !$('#name').value.trim()) {
     e.preventDefault();
-    addItem(n, '').then(() => { $('#url').value = ''; });
+    addItem(n, '').then(afterAdd);
   }
 });
 
