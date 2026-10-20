@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kakifilmek – A legszipiszupibb oldal</title>
+<style>
+  :root{--bg:#2a1a0f;--panel:#3b2616;--panel2:#4a3020;--text:#f6e7d3;--muted:#c2a27f;--accent:#c68642;--accent2:#e8b04a;--line:#5a3b25}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ctext x='20' y='70' font-size='36' opacity='0.08'%3E%F0%9F%92%A9%3C/text%3E%3C/svg%3E");color:var(--text);font-family:'Comic Sans MS','Chalkboard SE','Comic Neue',system-ui,sans-serif;min-height:100vh}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:16px 20px;background:linear-gradient(180deg,#5a3b25,#2a1a0f);border-bottom:3px solid var(--accent);position:sticky;top:0;z-index:10}
+  h1{margin:0;font-size:24px;letter-spacing:.5px}
+  h1 span{color:var(--accent2)}
+  .brand{line-height:1.1}
+  .slogan{font-size:12px;color:var(--muted);font-style:italic;margin:3px 0 0 32px}
+  form#addForm{flex:1;display:flex;gap:8px;min-width:260px}
+  input{padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;outline:none;width:100%;font-family:inherit}
+  form#addForm input#url{flex:1}
+  input:focus{border-color:var(--accent2)}
+  button{padding:11px 18px;border:0;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#2a1a0f;font-weight:700;cursor:pointer;font-size:15px;font-family:inherit}
+  button.ghost{background:var(--panel2);color:var(--text);font-weight:500;padding:9px 14px;font-size:14px}
+  button:hover{filter:brightness(1.1)}
+  button:disabled{opacity:.5;cursor:wait}
+  .badge{font-size:12px;padding:4px 10px;border-radius:20px;background:var(--panel2);color:var(--muted);white-space:nowrap}
+  .badge.on{background:#4a4a1e;color:#d6d36a}
+
+  main{padding:22px 20px 60px;max-width:1600px;margin:0 auto}
+  .bar{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+  .bar h2{margin:0;font-size:22px}
+  .bar input{max-width:340px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:3px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;position:relative}
+  .card:hover{transform:translateY(-5px);border-color:var(--accent2);box-shadow:0 10px 24px rgba(0,0,0,.45)}
+  .pic{aspect-ratio:16/9;background:#000 center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:72px;position:relative}
+  .pic.nothumb{background:linear-gradient(135deg,#5a3b25,#3b2616)}
+  .pic .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:58px;color:#fff;background:rgba(0,0,0,.35);opacity:0;transition:opacity .2s}
+  .card:hover .play{opacity:1}
+  .info{padding:12px 14px 14px}
+  .title{font-size:17px;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:2.5em}
+  .src{font-size:12px;color:var(--muted);margin-top:6px}
+  .del{position:absolute;top:8px;right:8px;width:32px;height:32px;padding:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:18px;line-height:1;opacity:0;transition:opacity .2s}
+  .card:hover .del{opacity:1}
+  @media(hover:none){.del{opacity:1}}
+  .empty{color:var(--muted);text-align:center;padding:40px 20px;grid-column:1/-1;font-size:16px}
+
+  .overlay{position:fixed;inset:0;background:var(--bg);z-index:20;overflow:auto;display:none}
+  .overlay.open{display:block}
+  .ov-inner{max-width:1300px;margin:0 auto;padding:16px 20px 40px}
+  .ov-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  .ov-top h2{margin:0;font-size:20px;flex:1;min-width:200px}
+  .ov-top a{color:var(--muted);font-size:13px}
+  .player{background:#000;border:4px solid var(--accent);border-radius:18px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
+  .player iframe,.player video{width:100%;height:100%;border:0;background:#000}
+  .hint{background:var(--panel);border-radius:10px;padding:10px 14px;color:var(--muted);font-size:13px;display:none;margin-top:12px}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);padding:10px 18px;border-radius:10px;opacity:0;transition:.3s;pointer-events:none;z-index:50}
+  .toast.show{opacity:1}
+  dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:20px;width:min(460px,92vw)}
+  dialog::backdrop{background:rgba(0,0,0,.6)}
+  dialog h3{margin:0 0 12px}
+  dialog label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+  dialog p{font-size:12px;color:var(--muted);line-height:1.5}
+  .row{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1>💩 <span>Kakifilmek</span> 🎬</h1>
+    <div class="slogan">A legszipiszupibb oldal</div>
+  </div>
+  <form id="addForm">
+    <input id="url" type="text" inputmode="url" placeholder="Illeszd be a kakifilm linkjét vagy iframe kódját…" required autocomplete="off">
+    <input id="name" type="text" placeholder="Cím (nem kötelező)" style="max-width:220px">
+    <button type="submit" id="addBtn">Hozzáad 💩</button>
+  </form>
+  <span class="badge" id="badge">csak olvasás</span>
+  <button class="ghost" id="cfgBtn" title="Beállítások">⚙</button>
+</header>
+
+<main>
+  <div class="bar">
+    <h2 id="count">Kakilista</h2>
+    <input id="search" type="search" placeholder="Keresés a kakifilmek között…" autocomplete="off">
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="ov-inner">
+    <div class="ov-top">
+      <button class="ghost" id="backBtn">← Vissza a kakilistához</button>
+      <h2 id="nowTitle"></h2>
+      <a id="nowLink" href="#" target="_blank" rel="noopener">Megnyitás új lapon ↗</a>
+    </div>
+    <div class="player" id="player"></div>
+    <div class="hint" id="hint">Ha a lejátszó üres marad, az az oldal valószínűleg nem engedi a beágyazást. Használd a „Megnyitás új lapon" linket.</div>
+  </div>
+</div>
+
+<dialog id="cfgDlg">
+  <h3>Beállítások</h3>
+  <label>GitHub token (csak szerkesztéshez)</label>
+  <input id="cfgToken" type="password" placeholder="github_pat_…" autocomplete="off">
+  <label>Repó tulajdonosa</label>
+  <input id="cfgOwner" type="text" placeholder="felhasznalonev">
+  <label>Repó neve</label>
+  <input id="cfgRepo" type="text" placeholder="repo-nev">
+  <label>Ág (branch)</label>
+  <input id="cfgBranch" type="text" placeholder="main">
+  <p>A token csak ebben a böngészőben tárolódik, a repóba nem kerül be. Token nélkül az oldal csak olvasható, így a látogatók látják a listát, de nem módosíthatják.</p>
+  <div class="row">
+    <button class="ghost" id="cfgLogout" type="button">Token törlése</button>
+    <button class="ghost" id="cfgCancel" type="button">Mégse</button>
+    <button id="cfgSave" type="button">Mentés</button>
+  </div>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+<script>
+const FILE = 'videok.json';
+const CFG_KEY = 'mozi-cfg-v1';
+const LEGACY_KEY = 'mozi-library-v1';
+const $ = s => document.querySelector(s);
+const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2400); };
+
+// ---- beállítások ----
+function defaults() {
+  const h = location.hostname;
+  if (h.endsWith('.github.io')) {
+    const owner = h.split('.')[0];
+    const repo = location.pathname.split('/')[1] || (owner + '.github.io');
+    return { owner, repo };
+  }
+  return { owner: '', repo: '' };
+}
+let cfg = Object.assign({ token: '', owner: '', repo: '', branch: '' }, defaults());
+try { Object.assign(cfg, JSON.parse(localStorage.getItem(CFG_KEY) || '{}')); } catch (e) {}
+const saveCfg = () => { try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (e) {} };
+const editable = () => !!(cfg.token && cfg.owner && cfg.repo);
+
+// ---- base64 (UTF-8 biztos) ----
+function b64decode(b64) {
+  const bin = atob(b64.replace(/\s/g, ''));
+  return new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+}
+function b64encode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+// ---- GitHub tárolás ----
+let items = [], sha = null;
+const apiUrl = () => `https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/${FILE}`;
+const headers = () => ({ 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + cfg.token });
+
+async function loadItems() {
+  if (editable()) {
+    const r = await fetch(apiUrl() + (cfg.branch ? '?ref=' + encodeURIComponent(cfg.branch) + '&' : '?') + 't=' + Date.now(), { headers: headers(), cache: 'no-store' });
+    if (r.status === 404) { items = []; sha = null; return; }
+    if (r.status === 401 || r.status === 403) throw new Error('A token érvénytelen vagy nincs jogosultsága (Contents: Read and write).');
+    if (!r.ok) throw new Error('GitHub hiba: ' + r.status);
+    const j = await r.json();
+    sha = j.sha;
+    items = JSON.parse(b64decode(j.content) || '[]');
+  } else {
+    sha = null; items = [];
+    let ok = false;
+    // látogatóknak is a GitHubról olvas közvetlenül (nincs Pages-késés), tartaléknak a sima fájl
+    if (cfg.owner && cfg.repo) {
+      try {
+        const r = await fetch(apiUrl() + (cfg.branch ? '?ref=' + encodeURIComponent(cfg.branch) + '&' : '?') + 't=' + Date.now(), { headers: { 'Accept': 'application/vnd.github+json' }, cache: 'no-store' });
+        if (r.ok) { items = JSON.parse(b64decode((await r.json()).content) || '[]'); ok = true; }
+      } catch (e) {}
+    }
+    if (!ok) {
+      try { const r = await fetch(FILE + '?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) items = await r.json(); } catch (e) {}
+    }
+  }
+  if (!Array.isArray(items)) items = [];
+}
+
+async function putItems(message) {
+  const body = { message, content: b64encode(JSON.stringify(items, null, 2) + '\n') };
+  if (sha) body.sha = sha;
+  if (cfg.branch) body.branch = cfg.branch;
+  const r = await fetch(apiUrl(), { method: 'PUT', headers: headers(), body: JSON.stringify(body) });
+  if (r.status === 409 || r.status === 422) return 'conflict';
+  if (r.status === 401 || r.status === 403) throw new Error('A token érvénytelen vagy nincs írási jogosultsága.');
+  if (!r.ok) throw new Error('Mentési hiba: ' + r.status);
+  sha = (await r.json()).content.sha;
+  return 'ok';
+}
+
+// mindig friss állapotra alkalmazza a módosítást, ütközésnél újrapróbál
+async function mutate(fn, message) {
+  if (!editable()) { toast('Szerkesztéshez add meg a tokent (⚙)'); openCfg(); return false; }
+  for (let i = 0; i < 3; i++) {
+    await loadItems();
+    items = fn(items);
+    if (await putItems(message) === 'ok') return true;
+  }
+  throw new Error('Nem sikerült menteni (ütközés).');
+}
+
+// ---- videó felismerés ----
+function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return 'link'; } }
+function parse(url) {
+  let m;
+  if ((m = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/)))
+    return { type: 'youtube', src: 'https://www.youtube.com/embed/' + m[1] + '?autoplay=1&rel=0', thumb: 'https://img.youtube.com/vi/' + m[1] + '/hqdefault.jpg', label: 'YouTube' };
+  if ((m = url.match(/vimeo\.com\/(?:.*\/)?(\d+)/)))
+    return { type: 'vimeo', src: 'https://player.vimeo.com/video/' + m[1] + '?autoplay=1', label: 'Vimeo' };
+  if ((m = url.match(/(?:dailymotion\.com\/video\/|dai\.ly\/)([a-z0-9]+)/i)))
+    return { type: 'dailymotion', src: 'https://www.dailymotion.com/embed/video/' + m[1] + '?autoplay=1', label: 'Dailymotion' };
+  if ((m = url.match(/(?:vk\.com|vkvideo\.ru)\/.*?(?:video|clip)(-?\d+)_(\d+)(?:.*?[?&]hash=([a-f0-9]+))?/i)))
+    return { type: 'vk', src: 'https://vk.com/video_ext.php?oid=' + m[1] + '&id=' + m[2] + (m[3] ? '&hash=' + m[3] : '') + '&hd=2&autoplay=1', label: 'VK' };
+  if ((m = url.match(/embed\.indavideo\.hu\/player\/video\/([a-z0-9]+)/i)))
+    return { type: 'indavideo', src: 'https://embed.indavideo.hu/player/video/' + m[1], label: 'Indavideo' };
+  try {
+    const x = new URL(url);
+    if (/(^|\.)(videa|videakid)\.hu$/i.test(x.hostname)) {
+      // Embed/player URL esetén őrizzük meg az eredeti paramétereket.
+      const isPlayer = /\/player\/?$/i.test(x.pathname);
+      let id = x.searchParams.get('v') || x.searchParams.get('video') || x.searchParams.get('id');
+
+      if (!id) {
+        const parts = x.pathname.split('/').filter(Boolean);
+        const last = parts[parts.length - 1] || '';
+        id = last.split('-').pop();
+      }
+
+      if (id && /^[A-Za-z0-9_-]{5,}$/.test(id)) {
+        const src = isPlayer
+          ? 'https://videa.hu' + x.pathname + x.search
+          : 'https://videa.hu/player?v=' + encodeURIComponent(id);
+        return { type: 'videa', src, label: 'Videa' };
+      }
+    }
+  } catch (e) {}
+  if (/\.m3u8(\?|#|$)/i.test(url)) return { type: 'hls', src: url, label: 'HLS stream' };
+  if (/\.(mp4|webm|ogg|ogv|mov|m4v)(\?|#|$)/i.test(url)) return { type: 'file', src: url, label: 'Videófájl' };
+  return { type: 'iframe', src: url, label: hostOf(url) };
+}
+function fallbackTitle(u) {
+  try { const x = new URL(u); const last = decodeURIComponent(x.pathname.split('/').filter(Boolean).pop() || ''); return last.replace(/\.[a-z0-9]{2,4}$/i, '').replace(/[-_]+/g, ' ') || x.hostname; }
+  catch (e) { return u; }
+}
+async function fetchTitle(url) {
+  try { const j = await (await fetch('https://noembed.com/embed?url=' + encodeURIComponent(url))).json(); return j.title || null; }
+  catch (e) { return null; }
+}
+
+// ---- műveletek ----
+// Elfogad sima linket és teljes <iframe …> beágyazó kódot is
+function normalizeInput(s) {
+  s = (s || '').trim();
+  const m = s.match(/<iframe[^>]*?\ssrc\s*=\s*["']([^"']+)["']/i);
+  if (m) s = m[1].trim();
+  if (s.startsWith('//')) s = 'https:' + s;
+  return s;
+}
+let busy = false;
+async function addItem(url, name) {
+  url = normalizeInput(url);
+  if (!/^https?:\/\//i.test(url)) { toast('Érvényes linket adj meg (http/https)'); return; }
+  if (!editable()) { toast('Szerkesztéshez add meg a tokent (⚙)'); openCfg(); return; }
+  if (busy) return; busy = true; $('#addBtn').disabled = true;
+  try {
+    const dup = items.find(i => i.url === url);
+    if (dup) { toast('Ez már a listában van'); return; }
+    const p = parse(url);
+    let title = name && name.trim();
+    if (!title && ['youtube', 'vimeo', 'dailymotion'].includes(p.type)) title = await fetchTitle(url);
+    if (!title && ['indavideo', 'videa', 'vk'].includes(p.type)) title = p.label + ' videó';
+    if (!title) title = fallbackTitle(url);
+    const item = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url, title, ...p };
+    if (await mutate(arr => arr.some(i => i.url === url) ? arr : [item, ...arr], 'Hozzáadva: ' + title.slice(0, 60))) {
+      render(); toast('Hozzáadva ✔ 💩');
+    }
+  } catch (e) { toast(e.message); }
+  finally { busy = false; $('#addBtn').disabled = false; }
+}
+async function removeItem(id) {
+  if (!confirm('Biztosan törlöd ezt a kakifilmet?')) return;
+  try {
+    if (await mutate(arr => arr.filter(i => i.id !== id), 'Törölve')) render();
+  } catch (e) { toast(e.message); }
+}
+
+// ---- főoldal (rács) ----
+function render() {
+  $('#count').textContent = items.length ? 'Kakilista (' + items.length + ')' : 'Kakilista';
+  const badge = $('#badge'); badge.textContent = editable() ? 'szerkesztő mód' : 'csak olvasás'; badge.classList.toggle('on', editable());
+  const q = $('#search').value.trim().toLowerCase();
+  const shown = items.filter(i => !q || (i.title + ' ' + i.label).toLowerCase().includes(q));
+  const grid = $('#grid'); grid.innerHTML = '';
+  if (!items.length) { grid.innerHTML = '<div class="empty">Még üres, mint a vécépapír-tartó. Illessz be egy kakifilm linkjét fent 💩</div>'; return; }
+  if (!shown.length) { grid.innerHTML = '<div class="empty">Nincs találat 💩</div>'; return; }
+  shown.forEach(it => {
+    const card = document.createElement('div'); card.className = 'card';
+    const pic = document.createElement('div'); pic.className = 'pic' + (it.thumb ? '' : ' nothumb');
+    if (it.thumb) pic.style.backgroundImage = 'url(' + it.thumb + ')'; else pic.textContent = '💩';
+    const play = document.createElement('div'); play.className = 'play'; play.textContent = '▶';
+    pic.appendChild(play);
+    const info = document.createElement('div'); info.className = 'info';
+    const t = document.createElement('div'); t.className = 'title'; t.textContent = it.title;
+    const s = document.createElement('div'); s.className = 'src'; s.textContent = it.label;
+    info.append(t, s);
+    card.append(pic, info);
+    if (editable()) {
+      const del = document.createElement('button'); del.className = 'del'; del.textContent = '×'; del.title = 'Törlés';
+      del.onclick = e => { e.stopPropagation(); removeItem(it.id); };
+      card.appendChild(del);
+    }
+    card.onclick = () => { location.hash = it.id; };
+    grid.appendChild(card);
+  });
+}
+
+// ---- lejátszó nézet ----
+let hls = null, playing = null;
+function openPlayer(id) {
+  const it = items.find(i => i.id === id); if (!it) { closePlayer(); return; }
+  if (playing === id) return;
+  closePlayer(true);
+  playing = id;
+  const box = $('#player'); box.innerHTML = '';
+  if (it.type === 'file' || it.type === 'hls') {
+    const v = document.createElement('video'); v.controls = true; v.autoplay = true; v.playsInline = true;
+    if (it.type === 'hls' && window.Hls && Hls.isSupported()) { hls = new Hls(); hls.loadSource(it.src); hls.attachMedia(v); }
+    else v.src = it.src;
+    box.appendChild(v);
+  } else {
+    const f = document.createElement('iframe');
+    f.src = it.src; f.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'; f.allowFullscreen = true;
+    box.appendChild(f);
+  }
+  $('#nowTitle').textContent = it.title;
+  $('#nowLink').href = it.url;
+  $('#hint').style.display = it.type === 'iframe' ? 'block' : 'none';
+  $('#overlay').classList.add('open'); $('#overlay').scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+function closePlayer(keepOpenState) {
+  if (hls) { hls.destroy(); hls = null; }
+  $('#player').innerHTML = '';
+  playing = null;
+  if (!keepOpenState) { $('#overlay').classList.remove('open'); document.body.style.overflow = ''; }
+}
+function onHash() {
+  const h = location.hash.slice(1);
+  if (h && items.some(i => i.id === h)) openPlayer(h); else closePlayer();
+}
+window.addEventListener('hashchange', onHash);
+$('#backBtn').onclick = () => { location.hash = ''; };
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('#overlay').classList.contains('open') && !document.querySelector('dialog[open]')) location.hash = '';
+});
+$('#search').addEventListener('input', render);
+
+// ---- beállítás ablak ----
+function openCfg() {
+  $('#cfgToken').value = cfg.token; $('#cfgOwner').value = cfg.owner; $('#cfgRepo').value = cfg.repo; $('#cfgBranch').value = cfg.branch;
+  $('#cfgDlg').showModal();
+}
+$('#cfgBtn').onclick = openCfg;
+$('#cfgCancel').onclick = () => $('#cfgDlg').close();
+$('#cfgSave').onclick = async () => {
+  cfg.token = $('#cfgToken').value.trim(); cfg.owner = $('#cfgOwner').value.trim(); cfg.repo = $('#cfgRepo').value.trim(); cfg.branch = $('#cfgBranch').value.trim();
+  saveCfg(); $('#cfgDlg').close(); await init();
+};
+$('#cfgLogout').onclick = async () => { cfg.token = ''; saveCfg(); $('#cfgDlg').close(); await init(); toast('Token törölve'); };
+
+// ---- hozzáadás űrlap ----
+$('#addForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  await addItem($('#url').value, $('#name').value);
+  $('#url').value = ''; $('#name').value = '';
+});
+$('#url').addEventListener('paste', e => {
+  const txt = (e.clipboardData || window.clipboardData).getData('text').trim();
+  const n = normalizeInput(txt);
+  if (/^https?:\/\/\S+$/i.test(n) && !$('#name').value.trim()) {
+    e.preventDefault();
+    addItem(n, '').then(() => { $('#url').value = ''; });
+  }
+});
+
+// ---- indulás ----
+async function init() {
+  try { await loadItems(); } catch (e) { toast(e.message); }
+  // egyszeri átvétel a régi, böngészőben tárolt listából
+  if (editable()) {
+    try {
+      const old = JSON.parse(localStorage.getItem(LEGACY_KEY) || '[]');
+      if (old.length) {
+        await mutate(arr => { const have = new Set(arr.map(i => i.url)); return arr.concat(old.filter(o => o.url && !have.has(o.url))); }, 'Régi lista átvétele');
+        localStorage.removeItem(LEGACY_KEY); toast('Régi lista átvéve ✔');
+      }
+    } catch (e) {}
+  }
+  render();
+  onHash();
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !busy) loadItems().then(() => { render(); onHash(); }).catch(() => {}); });
+init();
+</script>
+</body>
+</html>
