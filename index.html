@@ -394,7 +394,12 @@ const headers = () => ({ 'Accept': 'application/vnd.github+json', 'Authorization
 async function loadItems() {
   if (editable()) {
     const r = await fetch(apiUrl() + (cfg.branch ? '?ref=' + encodeURIComponent(cfg.branch) + '&' : '?') + 't=' + Date.now(), { headers: headers(), cache: 'no-store' });
-    if (r.status === 404) { items = []; sha = null; return; }
+  if (r.status === 404) {
+  throw new Error(
+    'Nem találom a videok.json fájlt a GitHub-repóban. ' +
+    'Ellenőrizd az Owner, Repository és Branch beállításokat!'
+  );
+}
     if (r.status === 401 || r.status === 403) throw new Error('A token érvénytelen vagy nincs jogosultsága (Contents: Read and write).');
     if (!r.ok) throw new Error('GitHub hiba: ' + r.status);
     const j = await r.json();
