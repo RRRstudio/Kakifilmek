@@ -69,6 +69,9 @@
   .btn.ghost{background:rgba(255,255,255,.08);color:var(--text);box-shadow:none;border:1px solid var(--line);font-weight:500;backdrop-filter:blur(8px)}
   .btn.ghost:hover{background:rgba(255,255,255,.14);box-shadow:none}
   .btn.icon{padding:11px 14px}
+  .dice:hover,.dice.roll{animation:dice .6s ease}
+  @keyframes dice{0%{transform:rotate(0)}25%{transform:rotate(-18deg) scale(1.08)}50%{transform:rotate(14deg) scale(1.08)}75%{transform:rotate(-8deg)}100%{transform:rotate(0)}}
+  @media(max-width:560px){.hactions .lbl{display:none}}
   .badge{font-size:12px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
   .badge.on{background:rgba(140,170,50,.18);border-color:rgba(190,220,90,.4);color:#d9ee8a}
   .badge.on::before{content:"● ";color:#b6e04a}
@@ -260,6 +263,7 @@
   </label>
   <div class="hactions">
     <span class="badge" id="badge">csak olvasás</span>
+    <button class="btn ghost dice" id="randBtn" title="Véletlen kakifilm (R)">🎲<span class="lbl"> Random</span></button>
     <button class="btn" id="openAdd">＋ Új kakifilm</button>
     <button class="btn ghost icon" id="cfgBtn" title="Beállítások">⚙</button>
   </div>
@@ -311,6 +315,7 @@
       <h2 id="nowTitle"></h2>
       <span class="viewsbig" id="nowViews"></span>
       <a id="nowLink" href="#" target="_blank" rel="noopener">Megnyitás új lapon ↗</a>
+      <button class="btn ghost dice" id="randBtn2" title="Másik véletlen kakifilm (R)">🎲 Másik random</button>
     </div>
     <div class="player" id="player"></div>
     <div class="ov-nav" id="ovNav">
@@ -955,6 +960,28 @@ document.addEventListener('keydown', e => {
 });
 $('#search').addEventListener('input', render);
 
+// ---- véletlen film / sorozatrész ----
+let lastRandom = null;
+function randomPlay() {
+  if (!items.length) { toast('Még nincs egy kakifilm sem 💩'); return; }
+  let pool = items.filter(i => i.id !== playing && i.id !== lastRandom);
+  if (!pool.length) pool = items.filter(i => i.id !== playing);
+  if (!pool.length) pool = items;
+  const it = pool[Math.floor(Math.random() * pool.length)];
+  lastRandom = it.id;
+  toast('🎲 ' + it.title);
+  location.hash = it.id;
+}
+['#randBtn', '#randBtn2'].forEach(s => {
+  const b = $(s);
+  b.onclick = () => { b.classList.remove('roll'); void b.offsetWidth; b.classList.add('roll'); randomPlay(); };
+});
+document.addEventListener('keydown', e => {
+  if ((e.key !== 'r' && e.key !== 'R') || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (document.querySelector('dialog[open]') || /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
+  randomPlay();
+});
+
 // ---- hozzáadás panel ----
 function openAddPanel() {
   if (!editable()) { toast('Szerkesztéshez add meg a tokent (⚙)'); openCfg(); return; }
@@ -1022,3 +1049,4 @@ init();
 </script>
 </body>
 </html>
+  
