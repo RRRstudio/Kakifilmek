@@ -7,6 +7,7 @@
     "src": "https://videa.hu/player?v=itVbLF7cLs52BY19",
     "label": "Videa",
     "series": "Legyőzhetetlen - Invincible",
+    "thumb": "https://jobbmintatv.pro/borito/sorozat/Legyozhetetlen_big.jpg?0",
     "season": 1,
     "episode": 8,
     "category": "Rajzfilm"
@@ -19,6 +20,7 @@
     "src": "https://videa.hu/player?v=XlxmbjGB4pkKwD8K",
     "label": "Videa",
     "series": "Legyőzhetetlen - Invincible",
+    "thumb": "https://jobbmintatv.pro/borito/sorozat/Legyozhetetlen_big.jpg?0",
     "season": 1,
     "episode": 7,
     "category": "Rajzfilm"
@@ -31,6 +33,7 @@
     "src": "https://videa.hu/player?v=31Kss1lWzzgUekSW",
     "label": "Videa",
     "series": "Legyőzhetetlen - Invincible",
+    "thumb": "https://jobbmintatv.pro/borito/sorozat/Legyozhetetlen_big.jpg?0",
     "season": 1,
     "episode": 6,
     "category": "Rajzfilm"
@@ -43,6 +46,7 @@
     "src": "https://videa.hu/player?v=ZcF7RRDXJfVhMv8g",
     "label": "Videa",
     "series": "Legyőzhetetlen - Invincible",
+    "thumb": "https://jobbmintatv.pro/borito/sorozat/Legyozhetetlen_big.jpg?0",
     "season": 1,
     "episode": 5,
     "category": "Rajzfilm"
@@ -55,6 +59,7 @@
     "src": "https://videa.hu/player?v=r83JCTadGEgjKJNs",
     "label": "Videa",
     "series": "Legyőzhetetlen - Invincible",
+    "thumb": "https://jobbmintatv.pro/borito/sorozat/Legyozhetetlen_big.jpg?0",
     "season": 1,
     "episode": 4,
     "category": "Rajzfilm"
@@ -67,6 +72,7 @@
     "src": "https://videa.hu/player?v=ybRc03R3tEtBYuFV",
     "label": "Videa",
     "series": "Legyőzhetetlen - Invincible",
+    "thumb": "https://jobbmintatv.pro/borito/sorozat/Legyozhetetlen_big.jpg?0",
     "season": 1,
     "episode": 3,
     "category": "Rajzfilm"
@@ -79,6 +85,7 @@
     "src": "https://videa.hu/player?v=Jh47Y2YVF1H7uHsZ",
     "label": "Videa",
     "series": "Legyőzhetetlen - Invincible",
+    "thumb": "https://jobbmintatv.pro/borito/sorozat/Legyozhetetlen_big.jpg?0",
     "season": 1,
     "episode": 2,
     "category": "Rajzfilm"
@@ -93,7 +100,8 @@
     "category": "Rajzfilm",
     "series": "Legyőzhetetlen - Invincible",
     "season": 1,
-    "episode": 1
+    "episode": 1,
+    "thumb": "https://jobbmintatv.pro/borito/sorozat/Legyozhetetlen_big.jpg?0"
   },
   {
     "id": "mvjg6wdq9rc",
