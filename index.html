@@ -171,6 +171,11 @@
   .info{padding:14px 16px 16px}
   .title{font-size:18px;font-weight:600;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:2.5em}
   .src{display:inline-block;margin-top:10px;padding:3px 11px;border-radius:999px;font-size:12px;color:var(--muted);background:rgba(255,255,255,.07);border:1px solid var(--line)}
+  .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .tags .src{margin-top:0}
+  .src.views{color:var(--accent);border-color:rgba(245,185,66,.3);background:rgba(245,185,66,.08);font-variant-numeric:tabular-nums}
+  .viewsbig{font-size:14px;color:var(--accent);padding:8px 14px;border-radius:999px;border:1px solid rgba(245,185,66,.35);background:rgba(245,185,66,.1);white-space:nowrap}
+  .viewsbig:empty{display:none}
   .cbtn{position:absolute;top:12px;z-index:4;width:34px;height:34px;padding:0;border:1px solid rgba(255,255,255,.25);border-radius:50%;
     background:rgba(18,9,5,.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:16px;line-height:1;cursor:pointer;opacity:0;transform:scale(.8);transition:all .2s}
   .cbtn.del{right:12px;font-size:19px}
@@ -304,6 +309,7 @@
     <div class="ov-top">
       <button class="btn ghost" id="backBtn">← Vissza</button>
       <h2 id="nowTitle"></h2>
+      <span class="viewsbig" id="nowViews"></span>
       <a id="nowLink" href="#" target="_blank" rel="noopener">Megnyitás új lapon ↗</a>
     </div>
     <div class="player" id="player"></div>
@@ -632,6 +638,53 @@ $('#edSave').onclick = async () => {
   } catch (e) { toast(e.message); }
 };
 
+// ---- megtekintés-számláló (abacus.jasoncameron.dev: ingyenes, regisztráció nélkül) ----
+const VIEW_API = 'https://abacus.jasoncameron.dev';
+const viewNs = () => ('kakifilmek.' + (cfg.owner || location.hostname) + '.' + (cfg.repo || 'site')).toLowerCase().replace(/[^a-z0-9._-]/g, '-');
+const viewKey = id => String(id).replace(/[^A-Za-z0-9_-]/g, '');
+let viewCache = {};
+try { viewCache = JSON.parse(localStorage.getItem('mozi-views') || '{}'); } catch (e) {}
+const saveViews = () => { try { localStorage.setItem('mozi-views', JSON.stringify(viewCache)); } catch (e) {} };
+const fmtViews = n => Number(n).toLocaleString('hu-HU');
+// egyszerre legfeljebb 4 kérés, hogy ne terheljük a szolgáltatást
+let vActive = 0; const vQueue = [];
+function pumpViews() {
+  while (vActive < 4 && vQueue.length) {
+    const { fn, res, rej } = vQueue.shift(); vActive++;
+    fn().then(res, rej).finally(() => { vActive--; pumpViews(); });
+  }
+}
+const limited = fn => new Promise((res, rej) => { vQueue.push({ fn, res, rej }); pumpViews(); });
+async function viewReq(kind, id) {
+  const r = await fetch(VIEW_API + '/' + kind + '/' + viewNs() + '/' + viewKey(id));
+  if (r.status === 404) return 0; // még nem nézte meg senki
+  if (!r.ok) throw new Error('számláló: ' + r.status);
+  return Number((await r.json()).value) || 0;
+}
+async function getViews(id) {
+  const c = viewCache[id];
+  if (c && Date.now() - c.t < 5 * 60 * 1000) return c.v;
+  const v = await limited(() => viewReq('get', id));
+  viewCache[id] = { v, t: Date.now() }; saveViews();
+  return v;
+}
+// egy böngészőmunkamenetben egy videót csak egyszer számol (frissítgetéssel nem lehet pörgetni)
+async function hitView(id) {
+  let seen = []; try { seen = JSON.parse(sessionStorage.getItem('mozi-seen') || '[]'); } catch (e) {}
+  if (seen.includes(id)) return getViews(id);
+  const v = await viewReq('hit', id);
+  viewCache[id] = { v, t: Date.now() }; saveViews();
+  seen.push(id); try { sessionStorage.setItem('mozi-seen', JSON.stringify(seen)); } catch (e) {}
+  return v;
+}
+let vObs = null;
+function watchViews(el) {
+  const go = () => getViews(el.dataset.id).then(n => { el.textContent = '👁 ' + fmtViews(n); }).catch(() => {});
+  if (!('IntersectionObserver' in window)) { go(); return; }
+  if (!vObs) vObs = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { vObs.unobserve(en.target); en.target.__go(); } }), { rootMargin: '200px' });
+  el.__go = go; vObs.observe(el);
+}
+
 // ---- főoldal / sorozat oldal ----
 let filter = 'all';
 let catFilter = '__all';
@@ -649,7 +702,9 @@ function makeCard(o) {
   const info = document.createElement('div'); info.className = 'info';
   const t = document.createElement('div'); t.className = 'title'; t.textContent = o.title;
   const s = document.createElement('div'); s.className = 'src'; s.textContent = o.sub;
-  info.append(t, s);
+  const tags = document.createElement('div'); tags.className = 'tags'; tags.appendChild(s);
+  if (o.id) { const v = document.createElement('span'); v.className = 'src views'; v.dataset.id = o.id; v.textContent = '👁 –'; tags.appendChild(v); watchViews(v); }
+  info.append(t, tags);
   card.append(pic, info);
   if (editable() && o.id) {
     const ed = document.createElement('button'); ed.className = 'cbtn edit'; ed.textContent = '✎'; ed.title = 'Szerkesztés';
@@ -838,6 +893,11 @@ function openPlayer(id) {
   }
   $('#nowTitle').textContent = it.title;
   $('#nowLink').href = it.url;
+  $('#nowViews').textContent = '';
+  hitView(id).then(v => {
+    if (playing === id) $('#nowViews').textContent = '👁 ' + fmtViews(v) + ' megtekintés';
+    document.querySelectorAll('.views[data-id="' + id + '"]').forEach(e => { e.textContent = '👁 ' + fmtViews(v); });
+  }).catch(() => {});
   $('#hint').style.display = it.type === 'iframe' ? 'block' : 'none';
   const amb = $('#ambient'); amb.style.backgroundImage = it.thumb ? 'url(' + it.thumb + ')' : ''; amb.classList.toggle('nothumb', !it.thumb);
   // sorozat: előző / következő rész
