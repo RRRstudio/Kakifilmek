@@ -119,6 +119,27 @@
   .season h3{margin:8px 0 14px;font-size:21px;color:var(--accent);display:flex;align-items:center;gap:10px}
   .season h3::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
 
+  /* kategóriák */
+  .catbar{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 14px;margin:-6px 0 14px;scrollbar-width:none}
+  .catbar:empty{display:none}
+  .catbar::-webkit-scrollbar{display:none}
+  .catbar .chip{flex:none;white-space:nowrap;border:1px solid var(--line);background:rgba(255,255,255,.05)}
+  .catbar .chip.active{border-color:transparent}
+  .catrow{margin-bottom:6px}
+  .rowhead{display:flex;align-items:center;gap:12px;margin:6px 2px 0}
+  .rowhead h3{margin:0;font-size:24px;font-weight:700;cursor:pointer;display:flex;align-items:baseline;gap:10px;transition:color .2s}
+  .rowhead h3:hover{color:var(--accent)}
+  .rowhead h3 small{font-size:14px;color:var(--muted);font-weight:500}
+  .rowhead .more{font-size:13px;color:var(--accent);opacity:0;transform:translateX(-6px);transition:all .25s}
+  .rowhead h3:hover .more{opacity:1;transform:none}
+  .arrows{margin-left:auto;display:flex;gap:8px}
+  .arrows button{width:38px;height:38px;padding:0;border-radius:50%;font-size:20px;line-height:1}
+  .rail{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x proximity;padding:22px 8px 34px;margin:0 -8px;scrollbar-width:none}
+  .rail::-webkit-scrollbar{display:none}
+  .rail .card{flex:0 0 clamp(250px,24vw,330px);scroll-snap-align:start}
+  @media(max-width:560px){.rail .card{flex-basis:78vw}.arrows{display:none}}
+  @media(hover:none){.arrows{display:none}}
+
   /* kártyák */
   @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
   @keyframes spin{to{--ang:360deg}}
@@ -246,6 +267,7 @@
   <form id="addForm">
     <input id="url" type="text" inputmode="url" placeholder="Link vagy iframe kód…" required autocomplete="off">
     <input id="name" type="text" placeholder="Cím (nem kötelező)">
+    <input id="category" type="text" list="catNames" placeholder="Kategória (pl. Komédia, Rajzfilm)" autocomplete="off">
     <div class="srow">
       <input id="series" type="text" list="seriesNames" placeholder="Sorozat neve (ha sorozat része)" autocomplete="off">
       <input id="season" type="number" min="1" placeholder="Évad">
@@ -255,6 +277,7 @@
   </form>
 </div>
 <datalist id="seriesNames"></datalist>
+<datalist id="catNames"></datalist>
 
 <main>
   <div id="heroBox"></div>
@@ -266,6 +289,7 @@
       <button class="chip" data-f="series">Sorozatok</button>
     </div>
   </div>
+  <div class="catbar" id="catBar"></div>
   <div class="bar" id="seriesBar" style="display:none">
     <button class="btn ghost" id="seriesBack">← Vissza</button>
     <h2 id="seriesTitle"></h2>
@@ -314,6 +338,8 @@
   <h3>✎ Szerkesztés</h3>
   <label>Cím</label>
   <input id="edTitle" type="text">
+  <label>Kategória</label>
+  <input id="edCategory" type="text" list="catNames" autocomplete="off">
   <label>Sorozat neve (üresen hagyva sima film)</label>
   <input id="edSeries" type="text" list="seriesNames" autocomplete="off">
   <label>Évad</label>
@@ -514,7 +540,15 @@ function updateNames() {
   items.forEach(i => { if (i.series && !seen.has(skey(i.series))) { seen.add(skey(i.series)); names.push(i.series); } });
   $('#seriesNames').innerHTML = '';
   names.forEach(n => { const o = document.createElement('option'); o.value = n; $('#seriesNames').appendChild(o); });
+  // kategória-javaslatok: az eddig használtak + az alapértelmezettek
+  const cats = DEFAULT_CATS.slice(); const cseen = new Set(cats.map(skey));
+  items.forEach(i => { if (i.category && !cseen.has(skey(i.category))) { cseen.add(skey(i.category)); cats.unshift(i.category); } });
+  $('#catNames').innerHTML = '';
+  cats.forEach(n => { const o = document.createElement('option'); o.value = n; $('#catNames').appendChild(o); });
 }
+const DEFAULT_CATS = ['Komédia', 'Rajzfilm', 'Akció', 'Horror', 'Dráma', 'Sci-fi', 'Családi', 'Kaland', 'Romantikus', 'Thriller', 'Dokumentum', 'Zene'];
+const CAT_EMOJI = { komedia: '😂', vigjatek: '😂', rajzfilm: '🎨', animacio: '🎨', mese: '🧚', anime: '🌸', akcio: '💥', horror: '👻', hatborzongato: '👻', drama: '🎭', 'sci-fi': '🚀', scifi: '🚀', fantasy: '🧙', csaladi: '👨‍👩‍👧', kaland: '🧭', romantikus: '💕', thriller: '🔪', krimi: '🕵️', dokumentum: '🎥', zene: '🎵', egyeb: '📦' };
+const catEmoji = n => CAT_EMOJI[(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase()] || '🎬';
 
 // ---- műveletek ----
 // Elfogad sima linket és teljes <iframe …> beágyazó kódot is
@@ -535,6 +569,8 @@ async function addItem(url, name) {
     const dup = items.find(i => i.url === url);
     if (dup) { toast('Ez már a listában van'); return false; }
     const series = $('#series').value.trim();
+    let category = $('#category').value.trim();
+    if (!category && series) category = ((episodesOf(series).find(x => x.category) || {}).category) || '';
     let season = 0, episode = 0;
     if (series) {
       season = parseInt($('#season').value) || 1;
@@ -552,6 +588,7 @@ async function addItem(url, name) {
     if (!title) title = fallbackTitle(url);
     const item = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), url, title, ...p };
     if (series) { item.series = series; item.season = season; item.episode = episode; }
+    if (category) item.category = category;
     if (await mutate(arr => arr.some(i => i.url === url) ? arr : [item, ...arr], 'Hozzáadva: ' + title.slice(0, 60))) {
       render(); toast('Hozzáadva ✔ 💩');
       return true;
@@ -572,13 +609,13 @@ let editingId = null;
 function openEdit(id) {
   const it = items.find(i => i.id === id); if (!it) return;
   editingId = id;
-  $('#edTitle').value = it.title || ''; $('#edSeries').value = it.series || '';
+  $('#edTitle').value = it.title || ''; $('#edSeries').value = it.series || ''; $('#edCategory').value = it.category || '';
   $('#edSeason').value = it.season || ''; $('#edEpisode').value = it.episode || '';
   $('#editDlg').showModal();
 }
 $('#edCancel').onclick = () => $('#editDlg').close();
 $('#edSave').onclick = async () => {
-  const title = $('#edTitle').value.trim(), series = $('#edSeries').value.trim();
+  const title = $('#edTitle').value.trim(), series = $('#edSeries').value.trim(), category = $('#edCategory').value.trim();
   const season = parseInt($('#edSeason').value) || 0, episode = parseInt($('#edEpisode').value) || 0;
   const id = editingId;
   $('#editDlg').close();
@@ -586,7 +623,8 @@ $('#edSave').onclick = async () => {
     await mutate(arr => arr.map(i => {
       if (i.id !== id) return i;
       const n = { ...i, title: title || i.title };
-      delete n.series; delete n.season; delete n.episode;
+      delete n.series; delete n.season; delete n.episode; delete n.category;
+      if (category) n.category = category;
       if (series) { n.series = series; n.season = season || 1; if (episode) n.episode = episode; }
       return n;
     }), 'Szerkesztve');
@@ -596,6 +634,7 @@ $('#edSave').onclick = async () => {
 
 // ---- főoldal / sorozat oldal ----
 let filter = 'all';
+let catFilter = '__all';
 let currentSeries = null;
 
 function makeCard(o) {
@@ -629,6 +668,7 @@ function render() {
   const isSeries = currentSeries !== null;
   $('#mainBar').style.display = isSeries ? 'none' : '';
   $('#seriesBar').style.display = isSeries ? '' : 'none';
+  $('#catBar').style.display = isSeries ? 'none' : '';
   $('#heroBox').innerHTML = '';
   const box = $('#content'); box.innerHTML = '';
   if (isSeries) renderSeries(box); else renderMain(box);
@@ -663,22 +703,35 @@ function makeHero(e) {
 }
 
 function renderMain(box) {
-  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.f === filter));
+  document.querySelectorAll('#chips .chip').forEach(c => c.classList.toggle('active', c.dataset.f === filter));
   const entries = []; const seen = new Set();
   items.forEach(it => {
     if (!it.series) entries.push({ kind: 'film', it });
     else { const k = skey(it.series); if (!seen.has(k)) { seen.add(k); entries.push({ kind: 'series', name: it.series }); } }
   });
   $('#count').textContent = entries.length ? 'Kakilista (' + entries.length + ')' : 'Kakilista';
+  // kategória az egyes bejegyzésekhez (sorozatnál az első olyan részé, amelyiknek van)
+  entries.forEach(e => { e.cat = e.kind === 'film' ? (e.it.category || '') : (((episodesOf(e.name).find(x => x.category)) || {}).category || ''); });
+  const cmap = new Map();
+  entries.forEach(e => { const k = e.cat ? skey(e.cat) : '__none'; if (!cmap.has(k)) cmap.set(k, { name: e.cat || 'Egyéb', n: 0 }); cmap.get(k).n++; });
+  if (catFilter !== '__all' && !cmap.has(catFilter)) catFilter = '__all';
+  const catBar = $('#catBar'); catBar.innerHTML = '';
+  if (cmap.size && !(cmap.size === 1 && cmap.has('__none'))) {
+    const mk = (key, label) => { const b = document.createElement('button'); b.className = 'chip' + (catFilter === key ? ' active' : ''); b.textContent = label; b.onclick = () => { catFilter = key; render(); }; catBar.appendChild(b); };
+    mk('__all', '🌈 Minden kategória');
+    [...cmap.entries()].sort((a, b) => (a[0] === '__none') - (b[0] === '__none')).forEach(([k, v]) => mk(k, catEmoji(v.name) + ' ' + v.name + ' (' + v.n + ')'));
+  }
   const q = $('#search').value.trim().toLowerCase();
   const shown = entries.filter(e => {
+    if (catFilter === '__none' && e.cat) return false;
+    if (catFilter !== '__all' && catFilter !== '__none' && skey(e.cat) !== catFilter) return false;
     if (filter === 'film' && e.kind !== 'film') return false;
     if (filter === 'series' && e.kind !== 'series') return false;
     if (!q) return true;
     if (e.kind === 'film') return (e.it.title + ' ' + e.it.label).toLowerCase().includes(q);
     return (e.name + ' ' + episodesOf(e.name).map(x => x.title).join(' ')).toLowerCase().includes(q);
   });
-  if (entries.length && !q && filter === 'all') $('#heroBox').appendChild(makeHero(entries[0]));
+  if (entries.length && !q && filter === 'all' && catFilter === '__all') $('#heroBox').appendChild(makeHero(entries[0]));
   const grid = document.createElement('div'); grid.className = 'grid'; box.appendChild(grid);
   if (!items.length) {
     if (loadErr && !editable()) {
@@ -688,19 +741,48 @@ function renderMain(box) {
     return;
   }
   if (!shown.length) { grid.innerHTML = '<div class="empty"><b>🕵️</b>Nincs találat. A kaki elbújt.</div>'; return; }
-  shown.forEach((e, idx) => {
+  const entryCard = (e, idx) => {
     if (e.kind === 'film') {
       const it = e.it;
-      grid.appendChild(makeCard({ i: idx, id: it.id, thumb: it.thumb, title: it.title, sub: it.label, onClick: () => { location.hash = it.id; } }));
-    } else {
-      const eps = episodesOf(e.name);
-      const th = (eps.find(x => x.thumb) || {}).thumb;
-      grid.appendChild(makeCard({
-        i: idx, thumb: th, icon: '📺', tag: '📺 SOROZAT', title: eps[0].series, sub: seriesSub(eps),
-        onClick: () => { location.hash = 's/' + encodeURIComponent(e.name); }
-      }));
+      return makeCard({ i: idx, id: it.id, thumb: it.thumb, title: it.title, sub: it.label + (it.category ? ' · ' + it.category : ''), onClick: () => { location.hash = it.id; } });
     }
-  });
+    const eps = episodesOf(e.name);
+    const th = (eps.find(x => x.thumb) || {}).thumb;
+    return makeCard({
+      i: idx, thumb: th, icon: '📺', tag: '📺 SOROZAT', title: eps[0].series, sub: seriesSub(eps) + (e.cat ? ' · ' + e.cat : ''),
+      onClick: () => { location.hash = 's/' + encodeURIComponent(e.name); }
+    });
+  };
+  // minden kategória nézet: kategóriánként egy görgethető sor; egyébként sima rács
+  if (catFilter === '__all' && !q && shown.some(e => e.cat)) {
+    grid.remove();
+    const groups = new Map();
+    shown.forEach(e => {
+      const k = e.cat ? skey(e.cat) : '__none';
+      if (!groups.has(k)) groups.set(k, { key: k, name: e.cat || 'Egyéb', list: [] });
+      groups.get(k).list.push(e);
+    });
+    [...groups.values()].sort((a, b) => (a.key === '__none') - (b.key === '__none')).forEach(g => {
+      const sec = document.createElement('section'); sec.className = 'catrow';
+      const head = document.createElement('div'); head.className = 'rowhead';
+      const h3 = document.createElement('h3');
+      h3.append(catEmoji(g.name) + ' ' + g.name);
+      const small = document.createElement('small'); small.textContent = '(' + g.list.length + ')'; h3.appendChild(small);
+      const more = document.createElement('span'); more.className = 'more'; more.textContent = 'Összes ›'; h3.appendChild(more);
+      h3.onclick = () => { catFilter = g.key; render(); };
+      const arrows = document.createElement('div'); arrows.className = 'arrows';
+      const prev = document.createElement('button'); prev.className = 'btn ghost'; prev.textContent = '‹';
+      const next = document.createElement('button'); next.className = 'btn ghost'; next.textContent = '›';
+      const rail = document.createElement('div'); rail.className = 'rail';
+      g.list.forEach((e, i) => rail.appendChild(entryCard(e, i)));
+      prev.onclick = () => rail.scrollBy({ left: -rail.clientWidth * .8, behavior: 'smooth' });
+      next.onclick = () => rail.scrollBy({ left: rail.clientWidth * .8, behavior: 'smooth' });
+      arrows.append(prev, next);
+      head.append(h3, arrows); sec.append(head, rail); box.appendChild(sec);
+    });
+  } else {
+    shown.forEach((e, idx) => grid.appendChild(entryCard(e, idx)));
+  }
 }
 
 function renderSeries(box) {
